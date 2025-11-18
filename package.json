@@ -1,0 +1,33 @@
+{
+  "name": "tank-squad-call",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "build": "webpack --progress --color"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/solar-artificer/tank-squad-call.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/solar-artificer/tank-squad-call/issues"
+  },
+  "homepage": "https://github.com/solar-artificer/tank-squad-call#readme",
+  "description": "",
+  "devDependencies": {
+    "@babel/core": "^7.28.5",
+    "@babel/preset-env": "^7.28.5",
+    "@babel/preset-react": "^7.28.5",
+    "babel-loader": "^10.0.0",
+    "raw-loader": "^4.0.2",
+    "url-loader": "^4.1.1",
+    "webpack": "^5.102.1",
+    "webpack-cli": "^6.0.1"
+  },
+  "dependencies": {
+    "classnames": "^2.5.1",
+    "lodash": "^4.17.21"
+  }
+}

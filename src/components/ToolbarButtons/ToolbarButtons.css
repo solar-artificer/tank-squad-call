@@ -1,0 +1,7 @@
+.toolbar-buttons {
+    height: 100%;
+    min-height: 32px;
+
+    display: flex;
+    gap: var(--space-12);
+}

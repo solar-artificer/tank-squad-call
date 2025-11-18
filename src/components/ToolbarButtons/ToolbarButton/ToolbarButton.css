@@ -1,0 +1,9 @@
+.toolbar-button {
+    max-height: 100%;
+    height: 30px;
+    background: transparent;
+}
+
+.toolbar-button img {
+    height: 100%;
+}
