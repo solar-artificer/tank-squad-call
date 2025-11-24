@@ -5,37 +5,68 @@ import toolbarButtonStyles from "./components/ToolbarButtons/ToolbarButton/Toolb
 import ToolbarButtons from "./components/ToolbarButtons/ToolbarButtons";
 
 export default class TankSquadCallPlugin {
-    _toolbarButtonsRoot = null;
+    _toolbarButtonsContainerElement = null;
+    _toolbarButtonsReactRoot = null;
+    _observer = null;
 
     constructor(meta) {
-        this.meta = meta;
     }
 
     start() {
-        BdApi.DOM.addStyle(this.meta.name, styles);
-        BdApi.DOM.addStyle(this.meta.name + "-toolbar-buttons", toolbarButtonsStyles);
-        BdApi.DOM.addStyle(this.meta.name + "-toolbar-button", toolbarButtonStyles);
+        console.log("TankSquadCallPlugin started");
 
-        // TODO add observer
-        this.addToolbarButtons();
+        this.addMarkup();
+
+        if (this._observer == null) {
+            const callback = (mutationsList, observer) => {
+                for (const mutation of mutationsList) {
+                    if (mutation.type !== 'childlist') {
+                        continue;
+                    }
+
+                    for (const removedNode of mutation.removedNodes) {
+                        if (removedNode === this._toolbarButtonsContainerElement) {
+                            console.log('Element was removed!');
+                            this.addToolbarButtons();
+                        }
+                    }
+                }
+            };
+            this._observer = new MutationObserver(callback);
+            this._observer.observe(this._toolbarButtonsContainerElement.parentNode, {
+                childList: true // Watch for additions/removals of child nodes
+            });
+        }
     }
 
     stop() {
-        BdApi.DOM.removeStyle(this.meta.name);
-        BdApi.DOM.removeStyle(this.meta.name + "-toolbar-buttons");
-        BdApi.DOM.removeStyle(this.meta.name + "-toolbar-button");
+        console.log("TankSquadCallPlugin stopped");
 
-        BdApi.ReactDOM.unmountComponentAtNode(this._toolbarButtonsRoot);
+        this._observer.disconnect();
+
+        this._toolbarButtonsReactRoot.unmount();
+        this._toolbarButtonsContainerElement.remove();
+    }
+
+    addMarkup() {
+        this.addToolbarButtons();
     }
 
     addToolbarButtons() {
         const toolbar = document.querySelector('[class^="appAsidePanelWrapper"] [class^="bar"] [class^="trailing"]');
 
-        const toolbarButtonsRootElement = BdApi.DOM.parseHTML("<div class='toolbar-buttons-root'>");
-        toolbar.prepend(toolbarButtonsRootElement);
+        this._toolbarButtonsContainerElement = BdApi.DOM.parseHTML("<div class='toolbar-buttons-container'>");
+        toolbar.prepend(this._toolbarButtonsContainerElement);
 
-        this._toolbarButtonsRoot = BdApi.ReactDOM.createRoot(toolbarButtonsRootElement);
-        this._toolbarButtonsRoot.render(BdApi.React.createElement(ToolbarButtons));
+        const toolbarButtonsReactRootElement = BdApi.DOM.parseHTML("<div class='toolbar-buttons-react-root'>");
+        this._toolbarButtonsContainerElement.prepend(toolbarButtonsReactRootElement);
+
+        this._toolbarButtonsReactRoot = BdApi.ReactDOM.createRoot(toolbarButtonsReactRootElement);
+        this._toolbarButtonsReactRoot.render(BdApi.React.createElement(ToolbarButtons));
+
+        const styleElement = BdApi.DOM.createElement('style', {className: 'tank-squad-call-toolbar-buttons-styles'});
+        styleElement.innerHTML = styles + toolbarButtonsStyles + toolbarButtonStyles;
+        this._toolbarButtonsContainerElement.prepend(styleElement);
     }
 
     getSettingsPanel() {
