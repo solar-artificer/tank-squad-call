@@ -39,7 +39,10 @@ module.exports = {
         rules: [
             {
                 test: /\.css$/,
-                use: "raw-loader"
+                use: [
+                    "raw-loader",
+                    'postcss-loader'
+                ]
             },
             {
                 test: /\.jsx$/,

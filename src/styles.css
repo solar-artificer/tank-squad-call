@@ -1,3 +1,5 @@
+@import "tailwindcss";
+
 .toolbar-buttons-container {
     max-height: 100%;
 }
