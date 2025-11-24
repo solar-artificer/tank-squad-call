@@ -34,6 +34,9 @@ module.exports = {
             ".jsx",
             ".css"
         ],
+        alias: {
+            '@': path.resolve(__dirname, 'src')
+        }
     },
     module: {
         rules: [
