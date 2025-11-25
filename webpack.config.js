@@ -38,6 +38,11 @@ module.exports = {
             '@': path.resolve(__dirname, 'src')
         }
     },
+    externalsType: 'var',
+    externals: {
+        react: 'BdApi.React',
+        'react-dom': 'BdApi.ReactDOM'
+    },
     module: {
         rules: [
             {

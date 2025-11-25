@@ -1,12 +1,19 @@
 import SettingsPanel from "./components/SettingsPanel/SettingsPanel";
-import styles from "./styles.css";
+
+import sharedStyles from "./styles.css";
 import toolbarButtonsStyles from "./components/ToolbarButtons/ToolbarButtons.css";
 import toolbarButtonStyles from "./components/ToolbarButtons/ToolbarButton/ToolbarButton.css";
+import settingsPanelStyles from "./components/SettingsPanel/SettingsPanel.css";
+
 import ToolbarButtons from "./components/ToolbarButtons/ToolbarButtons";
 
 export default class TankSquadCallPlugin {
     _toolbarButtonsContainerElement = null;
     _toolbarButtonsReactRoot = null;
+
+    _settingsPanelContainerElement = null;
+    _settingsPanelReactRoot = null;
+
     _observer = null;
 
     constructor(meta) {
@@ -15,7 +22,7 @@ export default class TankSquadCallPlugin {
     start() {
         console.log("TankSquadCallPlugin started");
 
-        this.addMarkup();
+        this.addToolbarButtons();
 
         if (this._observer == null) {
             const callback = (mutationsList, observer) => {
@@ -46,10 +53,9 @@ export default class TankSquadCallPlugin {
 
         this._toolbarButtonsReactRoot.unmount();
         this._toolbarButtonsContainerElement.remove();
-    }
 
-    addMarkup() {
-        this.addToolbarButtons();
+        this._settingsPanelReactRoot.unmount();
+        this._settingsPanelContainerElement.remove();
     }
 
     addToolbarButtons() {
@@ -58,18 +64,34 @@ export default class TankSquadCallPlugin {
         this._toolbarButtonsContainerElement = BdApi.DOM.parseHTML("<div class='toolbar-buttons-container'>");
         toolbar.prepend(this._toolbarButtonsContainerElement);
 
+        const shadow = this._toolbarButtonsContainerElement.attachShadow({mode: 'open'});
+
+        const styleElement = BdApi.DOM.createElement('style', {className: 'tank-squad-call-toolbar-buttons-styles'});
+        styleElement.innerHTML = sharedStyles + toolbarButtonsStyles + toolbarButtonStyles;
+        shadow.append(styleElement);
+
         const toolbarButtonsReactRootElement = BdApi.DOM.parseHTML("<div class='toolbar-buttons-react-root'>");
-        this._toolbarButtonsContainerElement.prepend(toolbarButtonsReactRootElement);
+        shadow.append(toolbarButtonsReactRootElement);
 
         this._toolbarButtonsReactRoot = BdApi.ReactDOM.createRoot(toolbarButtonsReactRootElement);
         this._toolbarButtonsReactRoot.render(BdApi.React.createElement(ToolbarButtons));
-
-        const styleElement = BdApi.DOM.createElement('style', {className: 'tank-squad-call-toolbar-buttons-styles'});
-        styleElement.innerHTML = styles + toolbarButtonsStyles + toolbarButtonStyles;
-        this._toolbarButtonsContainerElement.prepend(styleElement);
     }
 
     getSettingsPanel() {
-        return SettingsPanel;
+        this._settingsPanelContainerElement = BdApi.DOM.parseHTML("<div class='settings-panel-container'>");
+
+        const shadow = this._settingsPanelContainerElement.attachShadow({mode: 'open'});
+
+        const styleElement = BdApi.DOM.createElement('style', {className: 'tank-squad-call-toolbar-buttons-styles'});
+        styleElement.innerHTML = sharedStyles + settingsPanelStyles;
+        shadow.append(styleElement);
+
+        const settingsPanelReactRootElement = BdApi.DOM.parseHTML("<div class='settings-panel-react-root'>");
+        shadow.append(settingsPanelReactRootElement);
+
+        this._settingsPanelReactRoot = BdApi.ReactDOM.createRoot(settingsPanelReactRootElement);
+        this._settingsPanelReactRoot.render(BdApi.React.createElement(SettingsPanel));
+
+        return this._settingsPanelContainerElement;
     }
 }

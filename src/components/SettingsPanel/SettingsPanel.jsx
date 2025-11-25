@@ -1,21 +1,141 @@
-const { useState } = BdApi.React;
+import { Field, Label, Textarea, Input } from '@headlessui/react'
+
+const { useState, useEffect } = BdApi.React;
 
 import DiscordAPI from "../../discord-api/DiscordAPI";
+import DiscordComboBox from "@/components/DiscordComboBox/DiscordComboBox";
 
-function saveSettings(serializedSettings) {
-    console.log(serializedSettings);
-    DiscordAPI.settings = JSON.parse(serializedSettings);
-    DiscordAPI.saveSettings();
-}
+import './SettingsPanel.css';
 
 export default function SettingsPanel({}) {
-    const [serializedSettings, setSerializedSettings] = useState(JSON.stringify(DiscordAPI.settings));
+    const [settings, setSettings] = useState(DiscordAPI.settings);
+    const [servers, setServers] = useState([]);
+    const [voiceChannels, setVoiceChannels] = useState([]);
+    const [textChannels, setTextChannels] = useState([]);
+
+    // Load servers on mount
+    useEffect(() => {
+        const guilds = DiscordAPI.discordInternals.GuildStore.getGuilds();
+        const serverList = Object.values(guilds).map(guild => ({
+            id: guild.id,
+            name: guild.name
+        }));
+        setServers(serverList);
+    }, []);
+
+    // Load channels when server changes
+    useEffect(() => {
+        if (!settings.serverID) return;
+
+        try {
+            const guildChannels = DiscordAPI.discordInternals.GuildChannelStore.getChannels(settings.serverID);
+            
+            // Get voice channels
+            const voiceChannelList = guildChannels.VOCAL?.map(channelData => ({
+                id: channelData.channel.id,
+                name: channelData.channel.name
+            })) || [];
+            
+            // Get text channels
+            const textChannelList = guildChannels.SELECTABLE?.map(channelData => ({
+                id: channelData.channel.id,
+                name: channelData.channel.name
+            })) || [];
+
+            setVoiceChannels(voiceChannelList);
+            setTextChannels(textChannelList);
+        } catch (error) {
+            console.error('Error loading channels:', error);
+            setVoiceChannels([]);
+            setTextChannels([]);
+        }
+    }, [settings.serverID]);
+
+    const updateSetting = (key, value) => {
+        setSettings(prev => ({ ...prev, [key]: value }));
+    };
+
+    const handleSave = () => {
+        DiscordAPI.settings = settings;
+        DiscordAPI.saveSettings();
+        BdApi.showToast('Settings saved successfully!', { type: 'success' });
+    };
 
     return (
-        <div>
-            <textarea onChange={e=> setSerializedSettings(e.target.value)}>{serializedSettings}</textarea>
-            <button onClick={() => saveSettings(serializedSettings)}>Save</button>
-            <button onClick={() => saveSettings(serializedSettings)}>Save</button>
+        <div className="space-y-6 max-w-2xl flex flex-col">
+            <Field>
+                <Label className="discord-label block mb-2">
+                    Сервер
+                </Label>
+                <DiscordComboBox
+                    items={servers}
+                    value={settings.serverID}
+                    onChange={(value) => updateSetting('serverID', value)}
+                    placeholder="Select a server..."
+                    emptyMessage="No servers found."
+                />
+            </Field>
+
+            <Field>
+                <Label className="discord-label block mb-2">
+                    Канал для создания войса
+                </Label>
+                <DiscordComboBox
+                    items={voiceChannels}
+                    value={settings.createVoiceChannelChannelID}
+                    onChange={(value) => updateSetting('createVoiceChannelChannelID', value)}
+                    placeholder="Select a voice channel..."
+                    emptyMessage="No voice channels found. Select a server first."
+                />
+            </Field>
+
+            <Field>
+                <Label className="discord-label block mb-2">
+                    Канал для поиска игроков
+                </Label>
+                <DiscordComboBox
+                    items={textChannels}
+                    value={settings.callChannelID}
+                    onChange={(value) => updateSetting('callChannelID', value)}
+                    placeholder="Select a text channel..."
+                    emptyMessage="No text channels found. Select a server first."
+                />
+            </Field>
+
+            <Field>
+                <Label className="discord-label block mb-2">
+                    URL картинки с перечнем танков
+                </Label>
+                <Input
+                    type="text"
+                    value={settings.tankPoolPictureUrl}
+                    onChange={(e) => updateSetting('tankPoolPictureUrl', e.target.value)}
+                    placeholder="Enter image URL..."
+                    className="discord-input discord-text-input w-full transition-colors placeholder:text-[#87898c] focus:outline-none focus:ring-0 disabled:cursor-not-allowed disabled:opacity-50 font-normal"
+                />
+            </Field>
+
+            <Field>
+                <Label className="discord-label block mb-2">
+                    Шаблон сообщения
+                </Label>
+                <Textarea
+                    value={settings.callMessageTemplate}
+                    onChange={(e) => updateSetting('callMessageTemplate', e.target.value)}
+                    rows={8}
+                    placeholder="Enter message template... Use {AMOUNT_OF_FREE_SLOTS} and {CURRENT_VOICE_CHANNEL_LINK} as placeholders."
+                    className="w-full discord-input discord-textarea transition-colors placeholder:text-[#87898c] focus:outline-none focus:ring-0 disabled:cursor-not-allowed disabled:opacity-50 resize-y font-mono"
+                />
+            </Field>
+
+            <div className="flex justify-end pt-4">
+                <button 
+                    onClick={handleSave}
+                    className="rounded-[3px] bg-[#5865f2] px-4 py-2 text-sm font-medium text-white hover:bg-[#4752c4] focus:outline-none transition-colors"
+                >
+                    Сохранить
+                </button>
+            </div>
         </div>
-    )
+    );
 }
