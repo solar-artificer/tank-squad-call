@@ -1,6 +1,7 @@
 import SettingsPanel from "./components/SettingsPanel/SettingsPanel";
 
-import sharedStyles from "./styles.css";
+import sharedStyles from "./css/shared.css";
+import overrideSettingsPanelStyles from "./css/override-settings-panel.css";
 import toolbarButtonsStyles from "./components/ToolbarButtons/ToolbarButtons.css";
 import toolbarButtonStyles from "./components/ToolbarButtons/ToolbarButton/ToolbarButton.css";
 import settingsPanelStyles from "./components/SettingsPanel/SettingsPanel.css";
@@ -66,7 +67,14 @@ export default class TankSquadCallPlugin {
 
         const shadow = this._toolbarButtonsContainerElement.attachShadow({mode: 'open'});
 
-        const styleElement = BdApi.DOM.createElement('style', {className: 'tank-squad-call-toolbar-buttons-styles'});
+        // Fix keyboard events in shadow DOM
+        for (const eventType of ['keydown', 'paste', 'cut', 'copy']) {
+            shadow.addEventListener(eventType, (e) => {
+                e.stopPropagation();
+            }, true);
+        }
+
+        const styleElement = BdApi.DOM.createElement('style');
         styleElement.innerHTML = sharedStyles + toolbarButtonsStyles + toolbarButtonStyles;
         shadow.append(styleElement);
 
@@ -78,11 +86,22 @@ export default class TankSquadCallPlugin {
     }
 
     getSettingsPanel() {
-        this._settingsPanelContainerElement = BdApi.DOM.parseHTML("<div class='settings-panel-container'>");
+        this._settingsPanelContainerElement = BdApi.DOM.parseHTML("<div class='settings-panel-container tanksquad-call-trigger'>");
+
+        const hidingDefaultBetterDiscordPartsStyleElement = BdApi.DOM.createElement('style');
+        hidingDefaultBetterDiscordPartsStyleElement.innerHTML = overrideSettingsPanelStyles;
+        this._settingsPanelContainerElement.append(hidingDefaultBetterDiscordPartsStyleElement);
 
         const shadow = this._settingsPanelContainerElement.attachShadow({mode: 'open'});
 
-        const styleElement = BdApi.DOM.createElement('style', {className: 'tank-squad-call-toolbar-buttons-styles'});
+        // Fix keyboard events in shadow DOM
+        for (const eventType of ['keydown', 'paste', 'cut', 'copy']) {
+            shadow.addEventListener(eventType, (e) => {
+                e.stopPropagation();
+            }, true);
+        }
+
+        const styleElement = BdApi.DOM.createElement('style');
         styleElement.innerHTML = sharedStyles + settingsPanelStyles;
         shadow.append(styleElement);
 

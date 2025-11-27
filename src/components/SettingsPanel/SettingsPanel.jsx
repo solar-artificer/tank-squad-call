@@ -1,4 +1,4 @@
-import { Field, Label, Textarea, Input } from '@headlessui/react'
+import { Field, Label, Textarea, Input  } from '@headlessui/react'
 
 const { useState, useEffect } = BdApi.React;
 
@@ -81,11 +81,18 @@ export default function SettingsPanel({}) {
     const handleSave = () => {
         DiscordAPI.settings = settings;
         DiscordAPI.saveSettings();
-        BdApi.showToast('Settings saved successfully!', { type: 'success' });
+        BdApi.UI.showToast('Настройки сохранены!', { type: 'success' });
+
+        const closeButton = document.querySelector('.bd-modal-root:has( .tanksquad-call-trigger) .bd-modal-footer .bd-button');
+        closeButton.click();
     };
 
     return (
         <div className="space-y-6 max-w-2xl flex flex-col">
+            <h1 className="font-bold text-xl">
+                Найстроки для Зова ТАНКОСКВАДА
+            </h1>
+
             <Field>
                 <Label className="discord-label block mb-2">
                     Сервер
@@ -160,7 +167,7 @@ export default function SettingsPanel({}) {
             <div className="flex justify-end pt-4">
                 <button 
                     onClick={handleSave}
-                    className="rounded-[3px] bg-[#5865f2] px-4 py-2 text-sm font-medium text-white hover:bg-[#4752c4] focus:outline-none transition-colors"
+                    className="cursor-pointer rounded-[8px] bg-[#5865f2] px-4 py-2 text-sm font-medium text-white hover:bg-[#4752c4] focus:outline-none transition-colors"
                 >
                     Сохранить
                 </button>
