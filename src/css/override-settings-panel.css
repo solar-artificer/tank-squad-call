@@ -1,0 +1,4 @@
+.bd-modal-root:has( .tanksquad-call-trigger) .bd-modal-header h1,
+.bd-modal-root:has( .tanksquad-call-trigger) .bd-modal-footer .bd-button {
+    display: none;
+}
