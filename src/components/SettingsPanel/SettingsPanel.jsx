@@ -15,12 +15,34 @@ export default function SettingsPanel({}) {
 
     // Load servers on mount
     useEffect(() => {
-        const guilds = DiscordAPI.discordInternals.GuildStore.getGuilds();
+        let guilds = [];
+
+        try {
+            const sortedGuildIds = DiscordAPI.discordInternals.SortedGuildStore.getFlattenedGuildIds();
+            guilds = sortedGuildIds
+                .map(guildId => {
+                    const guild = DiscordAPI.discordInternals.GuildStore.getGuild(guildId);
+
+                    if (!guild) {
+                        return null;
+                    }
+
+                    return guild;
+                })
+                .filter(guild => guild !== null);
+        } catch (error) {
+            console.error(error)
+            guilds = DiscordAPI.discordInternals.GuildStore.getGuilds();
+        }
+
         const serverList = Object.values(guilds).map(guild => ({
             id: guild.id,
             name: guild.name,
             image: guild.icon ? `https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.webp?size=32` : null
         }));
+        
+        console.log('GUILDS');
+        console.log(serverList);
         setServers(serverList);
     }, []);
 
@@ -72,8 +94,8 @@ export default function SettingsPanel({}) {
                     items={servers}
                     value={settings.serverID}
                     onChange={(value) => updateSetting('serverID', value)}
-                    placeholder="Выбери сервер..."
-                    emptyMessage="Присоединись сперва к какому-то серверу."
+                    placeholder="Выбери сервер"
+                    emptyMessage="Нету подходящих серверов."
                     showImage={true}
                     showFallbackInitials={true}
                 />
@@ -88,7 +110,7 @@ export default function SettingsPanel({}) {
                     value={settings.createVoiceChannelChannelID}
                     onChange={(value) => updateSetting('createVoiceChannelChannelID', value)}
                     placeholder="Выбери канал для создания войс чата..."
-                    emptyMessage="Выбери сначала сервер."
+                    emptyMessage="Нету подходящих серверов."
                 />
             </Field>
 
@@ -100,8 +122,8 @@ export default function SettingsPanel({}) {
                     items={textChannels}
                     value={settings.callChannelID}
                     onChange={(value) => updateSetting('callChannelID', value)}
-                    placeholder="Выбери канал для поиска игроков..."
-                    emptyMessage="Выбери сначала сервер."
+                    placeholder="Выбери канал для поиска игроков"
+                    emptyMessage="Нету подходящих серверов."
                 />
             </Field>
 
@@ -113,7 +135,7 @@ export default function SettingsPanel({}) {
                     type="text"
                     value={settings.tankPoolPictureUrl}
                     onChange={(e) => updateSetting('tankPoolPictureUrl', e.target.value)}
-                    placeholder="URL картинки с перечнем танков..."
+                    placeholder="URL картинки с перечнем танков"
                     className="discord-input discord-text-input w-full transition-colors placeholder:text-[#87898c] focus:outline-none focus:ring-0 disabled:cursor-not-allowed disabled:opacity-50 font-normal"
                 />
             </Field>

@@ -7,6 +7,8 @@ class DiscordAPI {
         console.log(this.settings);
 
         this.discordInternals = this.getDiscordInternals();
+
+        window.discordInternals = this.discordInternals;
         console.log('DISCORD INTERNALS');
         console.log(this.discordInternals);
     }
@@ -23,8 +25,12 @@ class DiscordAPI {
     }
 
     getDiscordInternals() {
-        const ChannelStore = BdApi.Webpack.getModule(m => m.getChannel && m.hasChannel);
-        const GuildStore = BdApi.Webpack.getModule(m => m.getGuild && m.getGuilds);
+        const ChannelStore = BdApi.Webpack.getStore('ChannelStore');
+        const GuildStore = BdApi.Webpack.getStore('GuildStore');
+        const SortedGuildStore = BdApi.Webpack.getStore('SortedGuildStore');
+        const GuildChannelStore = BdApi.Webpack.getStore('GuildChannelStore');
+        const VoiceStateStore = BdApi.Webpack.getStore('VoiceStateStore');
+        const UserStore = BdApi.Webpack.getStore('UserStore');
 
         // Find the VoiceStateActions module - try multiple methods
         let VoiceActions = BdApi.Webpack.getModule(
@@ -47,39 +53,10 @@ class DiscordAPI {
             {searchExports: true}
         );
 
-        const GuildChannelStore = BdApi.Webpack.getModule(
-            m => m.getChannels && m.hasChannels,
-            {searchExports: true}
-        );
-
-        // Try multiple methods to find VoiceStateStore
-        let VoiceStateStore = BdApi.Webpack.getModule(
-            m => m.getVoiceStateForUser,
-            {searchExports: true}
-        );
-
-        if (!VoiceStateStore) {
-            VoiceStateStore = BdApi.Webpack.getModule(
-                m => m.getVoiceStatesForChannel,
-                {searchExports: true}
-            );
-        }
-
-        if (!VoiceStateStore) {
-            VoiceStateStore = BdApi.Webpack.getModule(
-                m => m.getVoiceState,
-                {searchExports: true}
-            );
-        }
-
-        const UserStore = BdApi.Webpack.getModule(
-            m => m.getCurrentUser,
-            {searchExports: true}
-        );
-
         return {
             ChannelStore,
             GuildStore,
+            SortedGuildStore,
             GuildChannelStore,
             VoiceStateStore,
             UserStore,

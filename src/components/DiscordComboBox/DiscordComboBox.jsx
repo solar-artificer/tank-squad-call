@@ -49,7 +49,16 @@ export default function DiscordComboBox({
             >
                 {({ open }) => (
                     <div>
-                        <Combobox.Button as="div" className="relative flex items-center">
+                        <Combobox.Button 
+                            as="div" 
+                            className="relative flex items-center"
+                            onKeyDown={(e) => {
+                                // Allow keyboard input to pass through to the Combobox.Input
+                                if (e.key === 'Backspace' || e.key === 'Delete' || e.key.length === 1) {
+                                    e.stopPropagation();
+                                }
+                            }}
+                        >
                             <div className="discord-combo-box-image">
                                 {selectedItem && (selectedItem[imageKey] || showFallbackInitials) && (
                                     selectedItem[imageKey] ? (
@@ -76,7 +85,7 @@ export default function DiscordComboBox({
                                 placeholder={placeholder}
                             />
 
-                            <div className="absolute inset-y-0 right-0 flex items-center pr-2 z-10">
+                            <div className="absolute inset-y-0 right-0 flex items-center pr-2 z-10 pointer-events-none">
                                 <svg
                                     className={`h-5 w-5 text-[#87898c] transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
                                     fill="none"
@@ -86,7 +95,7 @@ export default function DiscordComboBox({
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7"/>
                                 </svg>
                             </div>
-                                </Combobox.Button>
+                        </Combobox.Button>
 
                         <Combobox.Options
                             className="discord-combo-box-options-container absolute mt-1 max-h-60 w-full overflow-auto">
