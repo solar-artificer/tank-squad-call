@@ -18,7 +18,8 @@ export default function SettingsPanel({}) {
         const guilds = DiscordAPI.discordInternals.GuildStore.getGuilds();
         const serverList = Object.values(guilds).map(guild => ({
             id: guild.id,
-            name: guild.name
+            name: guild.name,
+            image: guild.icon ? `https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.webp?size=32` : null
         }));
         setServers(serverList);
     }, []);
@@ -71,21 +72,23 @@ export default function SettingsPanel({}) {
                     items={servers}
                     value={settings.serverID}
                     onChange={(value) => updateSetting('serverID', value)}
-                    placeholder="Select a server..."
-                    emptyMessage="No servers found."
+                    placeholder="Выбери сервер..."
+                    emptyMessage="Присоединись сперва к какому-то серверу."
+                    showImage={true}
+                    showFallbackInitials={true}
                 />
             </Field>
 
             <Field>
                 <Label className="discord-label block mb-2">
-                    Канал для создания войса
+                    Канал для создания войс чата
                 </Label>
                 <DiscordComboBox
                     items={voiceChannels}
                     value={settings.createVoiceChannelChannelID}
                     onChange={(value) => updateSetting('createVoiceChannelChannelID', value)}
-                    placeholder="Select a voice channel..."
-                    emptyMessage="No voice channels found. Select a server first."
+                    placeholder="Выбери канал для создания войс чата..."
+                    emptyMessage="Выбери сначала сервер."
                 />
             </Field>
 
@@ -97,8 +100,8 @@ export default function SettingsPanel({}) {
                     items={textChannels}
                     value={settings.callChannelID}
                     onChange={(value) => updateSetting('callChannelID', value)}
-                    placeholder="Select a text channel..."
-                    emptyMessage="No text channels found. Select a server first."
+                    placeholder="Выбери канал для поиска игроков..."
+                    emptyMessage="Выбери сначала сервер."
                 />
             </Field>
 
@@ -110,11 +113,13 @@ export default function SettingsPanel({}) {
                     type="text"
                     value={settings.tankPoolPictureUrl}
                     onChange={(e) => updateSetting('tankPoolPictureUrl', e.target.value)}
-                    placeholder="Enter image URL..."
+                    placeholder="URL картинки с перечнем танков..."
                     className="discord-input discord-text-input w-full transition-colors placeholder:text-[#87898c] focus:outline-none focus:ring-0 disabled:cursor-not-allowed disabled:opacity-50 font-normal"
                 />
             </Field>
 
+            {
+                /*
             <Field>
                 <Label className="discord-label block mb-2">
                     Шаблон сообщения
@@ -122,11 +127,13 @@ export default function SettingsPanel({}) {
                 <Textarea
                     value={settings.callMessageTemplate}
                     onChange={(e) => updateSetting('callMessageTemplate', e.target.value)}
-                    rows={8}
+                    rows={4}
                     placeholder="Enter message template... Use {AMOUNT_OF_FREE_SLOTS} and {CURRENT_VOICE_CHANNEL_LINK} as placeholders."
                     className="w-full discord-input discord-textarea transition-colors placeholder:text-[#87898c] focus:outline-none focus:ring-0 disabled:cursor-not-allowed disabled:opacity-50 resize-y font-mono"
                 />
             </Field>
+            */
+            }
 
             <div className="flex justify-end pt-4">
                 <button 
