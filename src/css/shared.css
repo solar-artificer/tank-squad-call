@@ -243,3 +243,9 @@
 .discord-combo-box-selected-icon {
     color: var(--brand-500);
 }
+
+.toolbar-buttons-react-root {
+    overflow: visible;
+    position: relative;
+    z-index: 10000;
+}

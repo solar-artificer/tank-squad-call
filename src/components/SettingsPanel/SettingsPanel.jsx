@@ -147,22 +147,6 @@ export default function SettingsPanel({}) {
                 />
             </Field>
 
-            {
-                /*
-            <Field>
-                <Label className="discord-label block mb-2">
-                    Шаблон сообщения
-                </Label>
-                <Textarea
-                    value={settings.callMessageTemplate}
-                    onChange={(e) => updateSetting('callMessageTemplate', e.target.value)}
-                    rows={4}
-                    placeholder="Enter message template... Use {AMOUNT_OF_FREE_SLOTS} and {CURRENT_VOICE_CHANNEL_LINK} as placeholders."
-                    className="w-full discord-input discord-textarea transition-colors placeholder:text-[#87898c] focus:outline-none focus:ring-0 disabled:cursor-not-allowed disabled:opacity-50 resize-y font-mono"
-                />
-            </Field>
-            */
-            }
 
             <div className="flex justify-end pt-4">
                 <button 

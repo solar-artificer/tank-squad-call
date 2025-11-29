@@ -6,6 +6,7 @@ import toolbarButtonsStyles from "./components/ToolbarButtons/ToolbarButtons.css
 import toolbarButtonStyles from "./components/ToolbarButtons/ToolbarButton/ToolbarButton.css";
 import settingsPanelStyles from "./components/SettingsPanel/SettingsPanel.css";
 import freeSlotsInputStyles from "./components/ToolbarButtons/FreeSlotsInput/FreeSlotsInput.css";
+import callOptionsButtonStyles from "./components/ToolbarButtons/CallOptionsButton/CallOptionsButton.css";
 
 import ToolbarButtons from "./components/ToolbarButtons/ToolbarButtons";
 
@@ -40,7 +41,10 @@ export default class TankSquadCallPlugin {
                     }
 
                     for (const addedNode of mutation.addedNodes) {
-                        if (addedNode.matches('[class*="appAsidePanelWrapper_"] [class*="bar_"]')) {
+                        if (
+                            addedNode.nodeType === Node.ELEMENT_NODE
+                            && addedNode.matches('[class*="appAsidePanelWrapper_"] [class*="bar_"]')
+                        ) {
                             this.addToolbarButtons();
                         }
                     }
@@ -82,7 +86,7 @@ export default class TankSquadCallPlugin {
 
         const toolbar = document.querySelector('[class*="appAsidePanelWrapper_"] [class*="bar_"] [class*="trailing_"]');
 
-        this._toolbarButtonsContainerElement = BdApi.DOM.parseHTML("<div class='toolbar-buttons-container'>");
+        this._toolbarButtonsContainerElement = BdApi.DOM.parseHTML("<div class='toolbar-buttons-container' style='position: relative; z-index: 10000; overflow: visible;'>");
         toolbar.prepend(this._toolbarButtonsContainerElement);
 
         const shadow = this._toolbarButtonsContainerElement.attachShadow({mode: 'open'});
@@ -99,7 +103,8 @@ export default class TankSquadCallPlugin {
             sharedStyles
             + toolbarButtonsStyles
             + toolbarButtonStyles
-            + freeSlotsInputStyles;
+            + freeSlotsInputStyles
+            + callOptionsButtonStyles;
         shadow.append(styleElement);
 
         const toolbarButtonsReactRootElement = BdApi.DOM.parseHTML("<div class='toolbar-buttons-react-root'>");

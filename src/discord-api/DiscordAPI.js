@@ -88,8 +88,8 @@ class DiscordAPI {
         let currentVoiceChannelLink = `https://discord.com/channels/${voiceChannelInfo.guild_id}/${voiceChannelInfo.id}`;
 
         const message = this.settings.callMessageTemplate
-            .replaceAll('{AMOUNT_OF_FREE_SLOTS}', amountOfFreeSlots.toString())
-            .replaceAll('{CURRENT_VOICE_CHANNEL_LINK}', currentVoiceChannelLink);
+            .replaceAll('FREE_SLOTS', amountOfFreeSlots.toString())
+            .replaceAll('LINK', currentVoiceChannelLink);
 
         return message;
     }
