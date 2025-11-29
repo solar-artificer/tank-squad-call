@@ -100,16 +100,25 @@ class DiscordAPI {
             return;
         }
 
-        // TODO I don't like this timeout
-        setTimeout(() => {
-                this.postPictureToVoiceChannel(
-                    this.settings.serverID,
-                    this.settings.createVoiceChannelChannelID,
-                    this.settings.tankPoolPictureUrl
-                );
-            },
-            5000
-        );
+        const interval = setInterval(() => {
+            let currentVoiceChannelID = this.getCurrentVoiceChannel()?.id;
+
+            if (
+                currentVoiceChannelID === null
+                || currentVoiceChannelID === undefined
+
+                || currentVoiceChannelID === this.settings.createVoiceChannelChannelID
+            ) {
+                return;
+            }
+
+            clearInterval(interval);
+            this.postPictureToVoiceChannel(
+                this.settings.serverID,
+                currentVoiceChannelID,
+                this.settings.tankPoolPictureUrl
+            );
+        }, 15);
     }
 
     joinVoiceChannel(serverId, channelId) {
@@ -160,6 +169,12 @@ class DiscordAPI {
 
             const voiceChannel = this.discordInternals.ChannelStore.getChannel(voiceChannelId);
             if (!voiceChannel) {
+                console.log({
+                    serverId,
+                    voiceChannelId,
+                    pictureURL
+                });
+                debugger;
                 throw new Error(`Could not find voice channel info!`);
             }
 
