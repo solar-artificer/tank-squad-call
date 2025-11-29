@@ -11,7 +11,7 @@ export default function CreateChannelButton() {
 
     return (
         <ToolbarButton onClick={handleCreateChannel}>
-            <img src={living_forge_icon} />
+            <img src={living_forge_icon} className="pointer-events-none" />
         </ToolbarButton>
     );
 }

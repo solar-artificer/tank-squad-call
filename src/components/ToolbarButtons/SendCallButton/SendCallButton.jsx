@@ -10,7 +10,7 @@ export default function SendCallButton({ freeSlots }) {
 
     return (
         <ToolbarButton onClick={handleSendCall}>
-            <img src={the_call_emote} />
+            <img src={the_call_emote} className="pointer-events-none" />
         </ToolbarButton>
     );
 }
