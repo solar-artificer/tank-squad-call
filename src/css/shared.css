@@ -122,10 +122,6 @@
     }
 }
 
-.toolbar-buttons-container {
-    max-height: 100%;
-}
-
 .discord-input {
     background-color: var(--input-background-default);
     border: 1px solid var(--input-border-default);

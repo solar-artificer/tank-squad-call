@@ -2,6 +2,7 @@ import debounce from 'lodash/debounce';
 const { useEffect, useRef, useMemo } = BdApi.React;
 
 import DiscordApi from '../../../discord-api/DiscordAPI';
+import './FreeSlotsInput.css';
 
 const AUTO_UPDATE_DELAY = 15_000;
 const AUTO_UPDATE_RATE = 50;
@@ -37,6 +38,18 @@ export default function FreeSlotsInput({ value, onValueChange }) {
         onValueChange(newValue);
     };
 
+    const handleIncrement = () => {
+        shouldAutoUpdateFreeSlots.current = false;
+        debouncedResumeAutoUpdateFunction();
+        onValueChange(Math.max(0, value + 1));
+    };
+
+    const handleDecrement = () => {
+        shouldAutoUpdateFreeSlots.current = false;
+        debouncedResumeAutoUpdateFunction();
+        onValueChange(Math.max(0, value - 1));
+    };
+
     useEffect(() => {
         updateFreeSlots();
         const intervalID = setInterval(updateFreeSlots, AUTO_UPDATE_RATE);
@@ -48,14 +61,32 @@ export default function FreeSlotsInput({ value, onValueChange }) {
     }, []);
 
     return (
-        <div>
+        <div className="free-slots-input-container">
             <input
+                className="discord-input discord-text-input free-slots-input use-custom-spinners"
                 type="number"
                 value={value}
                 onChange={handleInputChange}
                 min="0"
-                style={{ width: '60px'}}
             />
+            <div className="free-slots-spinner-buttons">
+                <button 
+                    className="free-slots-spinner-button" 
+                    onClick={handleIncrement}
+                    type="button"
+                    aria-label="Increment"
+                >
+                    ▲
+                </button>
+                <button 
+                    className="free-slots-spinner-button" 
+                    onClick={handleDecrement}
+                    type="button"
+                    aria-label="Decrement"
+                >
+                    ▼
+                </button>
+            </div>
         </div>
     );
 }

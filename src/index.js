@@ -5,6 +5,7 @@ import overrideSettingsPanelStyles from "./css/override-settings-panel.css";
 import toolbarButtonsStyles from "./components/ToolbarButtons/ToolbarButtons.css";
 import toolbarButtonStyles from "./components/ToolbarButtons/ToolbarButton/ToolbarButton.css";
 import settingsPanelStyles from "./components/SettingsPanel/SettingsPanel.css";
+import freeSlotsInputStyles from "./components/ToolbarButtons/FreeSlotsInput/FreeSlotsInput.css";
 
 import ToolbarButtons from "./components/ToolbarButtons/ToolbarButtons";
 
@@ -62,8 +63,10 @@ export default class TankSquadCallPlugin {
 
         this._observer.disconnect();
 
-        this._toolbarButtonsReactRoot.unmount();
-        this._toolbarButtonsContainerElement.remove();
+        if (this._toolbarButtonsReactRoot != null) {
+            this._toolbarButtonsReactRoot.unmount();
+            this._toolbarButtonsContainerElement.remove();
+        }
 
         if (this._settingsPanelReactRoot != null) {
             this._settingsPanelReactRoot.unmount();
@@ -72,6 +75,11 @@ export default class TankSquadCallPlugin {
     }
 
     addToolbarButtons() {
+        if (this._toolbarButtonsReactRoot != null) {
+            this._toolbarButtonsReactRoot.unmount();
+            this._toolbarButtonsContainerElement.remove();
+        }
+
         const toolbar = document.querySelector('[class*="appAsidePanelWrapper_"] [class*="bar_"] [class*="trailing_"]');
 
         this._toolbarButtonsContainerElement = BdApi.DOM.parseHTML("<div class='toolbar-buttons-container'>");
@@ -87,7 +95,11 @@ export default class TankSquadCallPlugin {
         }
 
         const styleElement = BdApi.DOM.createElement('style');
-        styleElement.innerHTML = sharedStyles + toolbarButtonsStyles + toolbarButtonStyles;
+        styleElement.innerHTML =
+            sharedStyles
+            + toolbarButtonsStyles
+            + toolbarButtonStyles
+            + freeSlotsInputStyles;
         shadow.append(styleElement);
 
         const toolbarButtonsReactRootElement = BdApi.DOM.parseHTML("<div class='toolbar-buttons-react-root'>");
