@@ -28,22 +28,32 @@ export default class TankSquadCallPlugin {
         if (this._observer == null) {
             const callback = (mutationsList, observer) => {
                 for (const mutation of mutationsList) {
-                    if (mutation.type !== 'childlist') {
+                    if (mutation.type !== 'childList') {
                         continue;
                     }
 
                     for (const removedNode of mutation.removedNodes) {
                         if (removedNode === this._toolbarButtonsContainerElement) {
-                            console.log('Element was removed!');
+                            this.addToolbarButtons();
+                        }
+                    }
+
+                    for (const addedNode of mutation.addedNodes) {
+                        if (addedNode.matches('[class*="appAsidePanelWrapper_"] [class*="bar_"]')) {
                             this.addToolbarButtons();
                         }
                     }
                 }
             };
+
             this._observer = new MutationObserver(callback);
-            this._observer.observe(this._toolbarButtonsContainerElement.parentNode, {
-                childList: true // Watch for additions/removals of child nodes
-            });
+            this._observer.observe(
+                document.body,
+                {
+                    childList: true,
+                    subtree: true
+                }
+            );
         }
     }
 
@@ -55,12 +65,14 @@ export default class TankSquadCallPlugin {
         this._toolbarButtonsReactRoot.unmount();
         this._toolbarButtonsContainerElement.remove();
 
-        this._settingsPanelReactRoot.unmount();
-        this._settingsPanelContainerElement.remove();
+        if (this._settingsPanelReactRoot != null) {
+            this._settingsPanelReactRoot.unmount();
+            this._settingsPanelContainerElement.remove();
+        }
     }
 
     addToolbarButtons() {
-        const toolbar = document.querySelector('[class^="appAsidePanelWrapper"] [class^="bar"] [class^="trailing"]');
+        const toolbar = document.querySelector('[class*="appAsidePanelWrapper_"] [class*="bar_"] [class*="trailing_"]');
 
         this._toolbarButtonsContainerElement = BdApi.DOM.parseHTML("<div class='toolbar-buttons-container'>");
         toolbar.prepend(this._toolbarButtonsContainerElement);
