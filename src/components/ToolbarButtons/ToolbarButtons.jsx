@@ -14,6 +14,8 @@ export default function ToolbarButtons() {
             <SendCallButton freeSlots={freeSlots} />
             <FreeSlotsInput value={freeSlots} onValueChange={setFreeSlots} />
             <CallOptionsButton />
+
+            <div className={"divider"}/>
         </div>
     );
 }

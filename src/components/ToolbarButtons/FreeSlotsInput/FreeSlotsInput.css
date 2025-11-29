@@ -3,6 +3,7 @@
     text-align: center;
     font-size: 14px;
     padding-inline: var(--space-8);
+    padding-block: 2px;
     height: auto;
 }
 
@@ -10,7 +11,7 @@
 .free-slots-input::-webkit-inner-spin-button,
 .free-slots-input::-webkit-outer-spin-button {
     opacity: 1;
-    height: 24px;
+    height: 26px;
     cursor: pointer;
 }
 
