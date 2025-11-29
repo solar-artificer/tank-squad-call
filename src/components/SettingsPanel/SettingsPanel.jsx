@@ -81,7 +81,7 @@ export default function SettingsPanel({}) {
     const handleSave = () => {
         DiscordAPI.settings = settings;
         DiscordAPI.saveSettings();
-        BdApi.UI.showToast('Настройки сохранены!', { type: 'success' });
+        DiscordAPI.showToast('Настройки сохранены!', 'success');
 
         const closeButton = document.querySelector('.bd-modal-root:has( .tanksquad-call-trigger) .bd-modal-footer .bd-button');
         closeButton.click();

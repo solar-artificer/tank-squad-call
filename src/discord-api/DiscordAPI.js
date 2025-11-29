@@ -141,13 +141,13 @@ class DiscordAPI {
 
             this.discordInternals.VoiceActions.selectVoiceChannel(channelId);
 
-            BdApi.UI.showToast(`Joining voice channel: ${channel.name}`, {type: "success"});
+            this.showToast(`Joining voice channel: ${channel.name}`, "success" );
             console.log(`TankSquadCall: Successfully joined ${channel.name}`);
 
             return true;
 
         } catch (error) {
-            BdApi.UI.showToast(`Error joining voice channel: ${error.message}`, {type: "error"});
+            this.showToast(`Error joining voice channel: ${error.message}`, "error");
             console.error("TankSquadCall Error:", error);
             return false;
         }
@@ -183,12 +183,12 @@ class DiscordAPI {
 
             this.discordInternals.MessageActions.sendMessage(targetTextChannel.id, pictureMessage, undefined, {});
 
-            BdApi.UI.showToast(`Picture posted to #${targetTextChannel.name}!`, {type: "success"});
+            this.showToast(`Picture posted to #${targetTextChannel.name}!`, "success" );
             console.log(`TankSquadCall: Picture posted to channel ${targetTextChannel.id}`);
 
             return true;
         } catch (error) {
-            BdApi.UI.showToast(`Error posting picture: ${error.message}`, {type: "error"});
+            this.showToast(`Error posting picture: ${error.message}`, "error" );
             console.error("TankSquadCall Error:", error);
             return false;
         }
@@ -273,6 +273,10 @@ class DiscordAPI {
             console.error("TankSquadCall: Error getting current free slots", error);
             return 0;
         }
+    }
+
+    showToast(message, type) {
+        BdApi.UI.showToast(message, {type: type});
     }
 }
 
