@@ -41,13 +41,13 @@ export default function FreeSlotsInput({ value, onValueChange }) {
     const handleIncrement = () => {
         shouldAutoUpdateFreeSlots.current = false;
         debouncedResumeAutoUpdateFunction();
-        onValueChange(Math.max(0, value + 1));
+        onValueChange(Math.max(1, value + 1));
     };
 
     const handleDecrement = () => {
         shouldAutoUpdateFreeSlots.current = false;
         debouncedResumeAutoUpdateFunction();
-        onValueChange(Math.max(0, value - 1));
+        onValueChange(Math.max(1, value - 1));
     };
 
     useEffect(() => {
@@ -67,7 +67,7 @@ export default function FreeSlotsInput({ value, onValueChange }) {
                 type="number"
                 value={value}
                 onChange={handleInputChange}
-                min="0"
+                min="1"
             />
             <div className="free-slots-spinner-buttons">
                 <button 

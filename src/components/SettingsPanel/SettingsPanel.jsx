@@ -4,6 +4,7 @@ const { useState, useEffect } = BdApi.React;
 
 import DiscordAPI from "../../discord-api/DiscordAPI";
 import DiscordComboBox from "@/components/DiscordComboBox/DiscordComboBox";
+import PicturePicker from "@/components/PicturePicker/PicturePicker";
 
 import './SettingsPanel.css';
 
@@ -134,18 +135,12 @@ export default function SettingsPanel({}) {
                 />
             </Field>
 
-            <Field>
-                <Label className="discord-label block mb-2">
-                    URL картинки с перечнем танков
-                </Label>
-                <Input
-                    type="text"
-                    value={settings.tankPoolPictureUrl}
-                    onChange={(e) => updateSetting('tankPoolPictureUrl', e.target.value)}
-                    placeholder="URL картинки с перечнем танков"
-                    className="discord-input discord-text-input w-full transition-colors placeholder:text-[#87898c] focus:outline-none focus:ring-0 disabled:cursor-not-allowed disabled:opacity-50 font-normal"
-                />
-            </Field>
+            <PicturePicker
+                value={settings.tankPoolPictureUrl}
+                onChange={(value) => updateSetting('tankPoolPictureUrl', value)}
+                label="URL картинки з перечнем танков"
+                placeholder="Нажми или перетяни картинку"
+            />
 
 
             <div className="flex justify-end pt-4">
