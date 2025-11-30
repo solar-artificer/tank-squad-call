@@ -53,6 +53,11 @@ class DiscordAPI {
             {searchExports: true}
         );
 
+        const CloudUploader = BdApi.Webpack.getModule(
+            m => m?.prototype?.upload && m?.prototype?.uploadFileToCloud,
+            {searchExports: true}
+        );
+
         return {
             ChannelStore,
             GuildStore,
@@ -62,6 +67,7 @@ class DiscordAPI {
             UserStore,
             VoiceActions,
             MessageActions,
+            CloudUploader
         }
     }
 
@@ -100,6 +106,15 @@ class DiscordAPI {
             return;
         }
 
+        setTimeout(() => {
+            this.postPictureToVoiceChannel(
+                this.settings.serverID,
+                this.settings.createVoiceChannelChannelID,
+                this.settings.tankPoolPictureUrl
+            );
+        }, 1000);
+        /*
+
         const interval = setInterval(() => {
             let currentVoiceChannelID = this.getCurrentVoiceChannel()?.id;
 
@@ -119,6 +134,7 @@ class DiscordAPI {
                 this.settings.tankPoolPictureUrl
             );
         }, 15);
+         */
     }
 
     joinVoiceChannel(serverId, channelId) {
@@ -150,7 +166,7 @@ class DiscordAPI {
 
             this.discordInternals.VoiceActions.selectVoiceChannel(channelId);
 
-            this.showToast(`Joining voice channel: ${channel.name}`, "success" );
+            this.showToast(`Joining voice channel: ${channel.name}`, "success");
             console.log(`TankSquadCall: Successfully joined ${channel.name}`);
 
             return true;
@@ -163,18 +179,13 @@ class DiscordAPI {
     }
 
     // Post picture to a specific voice channel (finds associated text channel)
-    postPictureToVoiceChannel(serverId, voiceChannelId, pictureURL) {
+    // Supports both URL and Base64 encoded images
+    async postPictureToVoiceChannel(serverId, voiceChannelId, pictureData) {
         try {
-            console.log(`Posting picture to voice channel ${voiceChannelId}: ${pictureURL}`);
+            console.log(`Posting picture to voice channel ${voiceChannelId}`);
 
             const voiceChannel = this.discordInternals.ChannelStore.getChannel(voiceChannelId);
             if (!voiceChannel) {
-                console.log({
-                    serverId,
-                    voiceChannelId,
-                    pictureURL
-                });
-                debugger;
                 throw new Error(`Could not find voice channel info!`);
             }
 
@@ -187,26 +198,84 @@ class DiscordAPI {
                 throw new Error(`Could not find message actions module!`);
             }
 
-            const pictureMessage = {
-                content: pictureURL,
-                tts: false,
-                invalidEmojis: [],
-                validNonShortcutEmojis: [],
-                // Add unique nonce
-                nonce: Date.now().toString() + Math.random().toString(36)
-            };
+            let file;
 
-            this.discordInternals.MessageActions.sendMessage(targetTextChannel.id, pictureMessage, undefined, {});
+            // Check if pictureData is base64 or URL
+            if (pictureData.startsWith('data:image/')) {
+                // Handle Base64 - convert to file
+                file = this.base64ToFile(pictureData);
+            } else {
+                // Handle URL - fetch and convert to file
+                const response = await fetch(pictureData);
+                const blob = await response.blob();
+                const mimeType = blob.type || 'image/png';
+                const extension = mimeType.split('/')[1] || 'png';
+                file = new File([blob], `image.${extension}`, {type: mimeType});
+            }
 
-            this.showToast(`Picture posted to #${targetTextChannel.name}!`, "success" );
+            const pictureUploader = new this.discordInternals.CloudUploader(
+                {
+                    file: file,
+                    platform: 1
+                },
+                targetTextChannel.id,
+                false,
+                0
+            );
+
+            await pictureUploader.upload();
+
+            this.discordInternals.MessageActions.sendMessage(
+                targetTextChannel.id,
+                {
+                    content: '',
+                    tts: false,
+                    invalidEmojis: [],
+                    validNonShortcutEmojis: [],
+                    nonce: Date.now().toString() + Math.random().toString(36)
+                },
+                undefined,
+                {
+                    attachmentsToUpload: [pictureUploader]
+                }
+            );
+
+            this.showToast(`Picture posted to #${targetTextChannel.name}!`, "success");
             console.log(`TankSquadCall: Picture posted to channel ${targetTextChannel.id}`);
-
             return true;
         } catch (error) {
-            this.showToast(`Error posting picture: ${error.message}`, "error" );
+            this.showToast(`Error posting picture: ${error.message}`, "error");
             console.error("TankSquadCall Error:", error);
             return false;
         }
+    }
+
+    // Helper method to convert base64 to File object
+    base64ToFile(base64Data) {
+        // Extract mime type and base64 content
+        const matches = base64Data.match(/^data:([^;]+);base64,(.+)$/);
+        if (!matches) {
+            throw new Error('Invalid base64 image format');
+        }
+
+        const mimeType = matches[1];
+        const base64Content = matches[2];
+
+        // Determine file extension from mime type
+        const extension = mimeType.split('/')[1] || 'png';
+        const filename = `image.${extension}`;
+
+        // Convert base64 to Blob
+        const byteCharacters = atob(base64Content);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+            byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        const blob = new Blob([byteArray], {type: mimeType});
+
+        // Create and return File object from Blob
+        return new File([blob], filename, {type: mimeType});
     }
 
     getTextChannelForVoiceChannel(voiceChannel) {
