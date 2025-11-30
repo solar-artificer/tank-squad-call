@@ -15,7 +15,7 @@ export default function FreeSlotsInput({ value, onValueChange }) {
             return;
         }
         
-        onValueChange(DiscordApi.getCurrentFreeSlots());
+        onValueChange(Math.max(1, DiscordApi.getCurrentFreeSlots()));
     };
 
     // Create debounced function to resume auto-updates after AUTO_UPDATE_DELAY ms
@@ -35,7 +35,7 @@ export default function FreeSlotsInput({ value, onValueChange }) {
         shouldAutoUpdateFreeSlots.current = false;
         debouncedResumeAutoUpdateFunction();
 
-        onValueChange(newValue);
+        onValueChange(Math.max(1, newValue));
     };
 
     const handleIncrement = () => {

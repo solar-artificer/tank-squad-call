@@ -115,8 +115,7 @@ class DiscordAPI {
                 this.settings.tankPoolPictureUrl
             );
         }, 1000);
-        /*
-
+        return;
         const interval = setInterval(() => {
             let currentVoiceChannelID = this.getCurrentVoiceChannel()?.id;
 
@@ -136,7 +135,6 @@ class DiscordAPI {
                 this.settings.tankPoolPictureUrl
             );
         }, 15);
-         */
     }
 
     joinVoiceChannel(serverId, channelId) {

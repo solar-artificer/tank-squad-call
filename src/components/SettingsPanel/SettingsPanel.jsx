@@ -76,16 +76,10 @@ export default function SettingsPanel({}) {
     }, [settings.serverID]);
 
     const updateSetting = (key, value) => {
-        setSettings(prev => ({ ...prev, [key]: value }));
-    };
-
-    const handleSave = () => {
-        DiscordAPI.settings = settings;
+        const newSettings = { ...settings, [key]: value };
+        setSettings(newSettings);
+        DiscordAPI.settings = newSettings;
         DiscordAPI.saveSettings();
-        DiscordAPI.showToast('Настройки сохранены!', 'success');
-
-        const closeButton = document.querySelector('.bd-modal-root:has( .tanksquad-call-trigger) .bd-modal-footer .bd-button');
-        closeButton.click();
     };
 
     return (
@@ -138,19 +132,9 @@ export default function SettingsPanel({}) {
             <PicturePicker
                 value={settings.tankPoolPictureUrl}
                 onChange={(value) => updateSetting('tankPoolPictureUrl', value)}
-                label="URL картинки з перечнем танков"
+                label="Картинка с перечнем танков"
                 placeholder="Нажми или перетяни картинку"
             />
-
-
-            <div className="flex justify-end pt-4">
-                <button 
-                    onClick={handleSave}
-                    className="cursor-pointer rounded-[8px] bg-[#5865f2] px-4 py-2 text-sm font-medium text-white hover:bg-[#4752c4] focus:outline-none transition-colors"
-                >
-                    Сохранить
-                </button>
-            </div>
         </div>
     );
 }
