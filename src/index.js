@@ -27,7 +27,10 @@ export default class TankSquadCallPlugin {
     start() {
         console.log("TankSquadCallPlugin started");
 
-        this.addToolbarButtons();
+        const toolbar = document.querySelector('[class*="appAsidePanelWrapper_"] [class*="bar_"] [class*="trailing_"]');
+        if (toolbar !== null) {
+            this.addToolbarButtons();
+        }
 
         if (this._observer == null) {
             const callback = (mutationsList, observer) => {
