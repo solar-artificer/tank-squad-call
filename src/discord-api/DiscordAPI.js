@@ -31,6 +31,7 @@ class DiscordAPI {
         const GuildChannelStore = BdApi.Webpack.getStore('GuildChannelStore');
         const VoiceStateStore = BdApi.Webpack.getStore('VoiceStateStore');
         const UserStore = BdApi.Webpack.getStore('UserStore');
+        const SlowmodeStore = BdApi.Webpack.getStore('SlowmodeStore');
 
         // Find the VoiceStateActions module - try multiple methods
         let VoiceActions = BdApi.Webpack.getModule(
@@ -65,6 +66,7 @@ class DiscordAPI {
             GuildChannelStore,
             VoiceStateStore,
             UserStore,
+            SlowmodeStore,
             VoiceActions,
             MessageActions,
             CloudUploader
@@ -357,6 +359,10 @@ class DiscordAPI {
             console.error("TankSquadCall: Error getting current free slots", error);
             return 0;
         }
+    }
+
+    getSlowModeCooldown(channelID) {
+        return this.discordInternals.SlowmodeStore.getSlowmodeCooldownGuess(channelID);
     }
 
     showToast(message, type) {

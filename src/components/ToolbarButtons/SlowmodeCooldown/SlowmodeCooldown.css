@@ -1,0 +1,13 @@
+.slowmode-cooldown {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    background-color: var(--background-modifier-accent);
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+    color: #ffff;
+    margin-left: 8px;
+    font-family: monospace;
+}

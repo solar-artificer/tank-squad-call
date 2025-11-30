@@ -8,6 +8,7 @@ import settingsPanelStyles from "./components/SettingsPanel/SettingsPanel.css";
 import freeSlotsInputStyles from "./components/ToolbarButtons/FreeSlotsInput/FreeSlotsInput.css";
 import callOptionsButtonStyles from "./components/ToolbarButtons/CallOptionsButton/CallOptionsButton.css";
 import picturePickerStyles from "./components/PicturePicker/PicturePicker.css";
+import slowmodeCooldownStyles from "./components/ToolbarButtons/SlowmodeCooldown/SlowmodeCooldown.css";
 
 import ToolbarButtons from "./components/ToolbarButtons/ToolbarButtons";
 
@@ -105,7 +106,8 @@ export default class TankSquadCallPlugin {
             + toolbarButtonsStyles
             + toolbarButtonStyles
             + freeSlotsInputStyles
-            + callOptionsButtonStyles;
+            + callOptionsButtonStyles
+            + slowmodeCooldownStyles;
         shadow.append(styleElement);
 
         const toolbarButtonsReactRootElement = BdApi.DOM.parseHTML("<div class='toolbar-buttons-react-root'>");
