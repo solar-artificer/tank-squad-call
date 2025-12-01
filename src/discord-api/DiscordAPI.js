@@ -108,14 +108,6 @@ class DiscordAPI {
             return;
         }
 
-        setTimeout(() => {
-            this.postPictureToVoiceChannel(
-                this.settings.serverID,
-                this.settings.createVoiceChannelChannelID,
-                this.settings.tankPoolPictureUrl
-            );
-        }, 1000);
-        return;
         const interval = setInterval(() => {
             let currentVoiceChannelID = this.getCurrentVoiceChannel()?.id;
 
