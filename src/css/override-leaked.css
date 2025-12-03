@@ -1,0 +1,12 @@
+:root {
+    --increase-bar-by: 24;
+}
+
+[class*="appAsidePanelWrapper_"] [class*="base_"] [class*="bar_"]  {
+    height: calc(32px + var(--increase-bar-by) * 1px);
+}
+
+[class*="appAsidePanelWrapper_"] [class*="base_"] [class*="bar_"] + [class*="content_"]  {
+    margin-top: calc(var(--increase-bar-by) * 1px);
+}
+

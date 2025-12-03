@@ -3,6 +3,9 @@ const { useEffect, useRef, useMemo } = BdApi.React;
 
 import DiscordApi from '../../../discord-api/DiscordAPI';
 import './FreeSlotsInput.css';
+import ToolbarButton from "@/components/ToolbarButtons/ToolbarButton/ToolbarButton";
+
+import free_slots_icon from "@/assets/Dancing_in_the_Moonlight_Poro_profileicon.png";
 
 const AUTO_UPDATE_DELAY = 15_000;
 const AUTO_UPDATE_RATE = 50;
@@ -62,6 +65,11 @@ export default function FreeSlotsInput({ value, onValueChange }) {
 
     return (
         <div className="free-slots-input-container">
+            <ToolbarButton>
+                <img src={free_slots_icon} className="pointer-events-none" alt="Количество свободных мест"/>
+            </ToolbarButton>
+            {/*
+            }
             <input
                 className="discord-input discord-text-input free-slots-input use-custom-spinners"
                 type="number"
@@ -87,6 +95,7 @@ export default function FreeSlotsInput({ value, onValueChange }) {
                     ▼
                 </button>
             </div>
+            */}
         </div>
     );
 }

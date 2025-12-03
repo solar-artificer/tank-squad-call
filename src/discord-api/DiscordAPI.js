@@ -155,16 +155,13 @@ class DiscordAPI {
             }
 
             console.log(`Joining voice channel: ${channel.name} in ${guild.name}`);
-
             this.discordInternals.VoiceActions.selectVoiceChannel(channelId);
-
-            this.showToast(`Joining voice channel: ${channel.name}`, "success");
             console.log(`TankSquadCall: Successfully joined ${channel.name}`);
 
             return true;
 
         } catch (error) {
-            this.showToast(`Error joining voice channel: ${error.message}`, "error");
+            this.showToast(`Произошла ошибка при подключении к войс чату: ${error.message}`, "error");
             console.error("TankSquadCall Error:", error);
             return false;
         }
@@ -232,11 +229,11 @@ class DiscordAPI {
                 }
             );
 
-            this.showToast(`Picture posted to #${targetTextChannel.name}!`, "success");
+            this.showToast(`Запостил картинку`, "success");
             console.log(`TankSquadCall: Picture posted to channel ${targetTextChannel.id}`);
             return true;
         } catch (error) {
-            this.showToast(`Error posting picture: ${error.message}`, "error");
+            this.showToast(`Произошла ошибка при постинге картинки: ${error.message}`, "error");
             console.error("TankSquadCall Error:", error);
             return false;
         }

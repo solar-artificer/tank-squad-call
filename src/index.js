@@ -1,5 +1,6 @@
 import SettingsPanel from "./components/SettingsPanel/SettingsPanel";
 
+import overrideLeakedStyles from "./css/override-leaked.css";
 import sharedStyles from "./css/shared.css";
 import overrideSettingsPanelStyles from "./css/override-settings-panel.css";
 import toolbarButtonsStyles from "./components/ToolbarButtons/ToolbarButtons.css";
@@ -24,8 +25,22 @@ export default class TankSquadCallPlugin {
     constructor(meta) {
     }
 
+    addOverrideLeakedCss() {
+        const existingStylesElement = document.querySelector('.tanksquad-call-override-leaked-css');
+        if (existingStylesElement !== null) {
+            return;
+        }
+
+        const createdStyleElement = BdApi.DOM.parseHTML('<style class="tanksquad-call-override-leaked-css"></style>');
+        createdStyleElement.innerHTML = overrideLeakedStyles;
+
+        document.head.appendChild(createdStyleElement);
+    }
+
     start() {
         console.log("TankSquadCallPlugin started");
+
+        this.addOverrideLeakedCss();
 
         const toolbar = document.querySelector('[class*="appAsidePanelWrapper_"] [class*="bar_"] [class*="trailing_"]');
         if (toolbar !== null) {

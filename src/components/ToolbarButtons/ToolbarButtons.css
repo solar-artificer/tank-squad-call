@@ -1,8 +1,84 @@
 .toolbar-buttons {
+    box-sizing: border-box;
     display: flex;
-    gap: var(--space-12);
-    align-items: stretch;
-
-    padding-block: 2px;
-    height: 32px;
+    height: 56px;
+    align-items: center;
 }
+
+.toolbar-buttons nav {
+    --original-toolbar-buttons-background-height: 127;
+    --height-without-increase: 32;
+    --toolbar-buttons-height: calc(var(--height-without-increase) + var(--increase-bar-by));
+    --toolbar-buttons-scale: calc(var(--toolbar-buttons-height) / var(--original-toolbar-buttons-background-height));
+
+    box-sizing: border-box;
+    display: flex;
+
+    height: 50px;
+    width: 178px;
+
+    background-size: contain;
+    background-repeat: no-repeat;
+    padding-top: 11px;
+    padding-left: 17px;
+    /*
+        17px
+        11px
+        17px;
+*/
+    gap: 11px;
+}
+
+.toolbar-buttons nav > * {
+    height: 28px;
+    width: 28px;
+    flex-shrink: 0;
+    overflow: hidden;
+    /*
+    position: relative;
+    visibility: hidden;
+
+     */
+}
+/*
+
+.toolbar-buttons nav > *::before{
+    display: block;
+    content: '';
+    width: 31px;
+    height: 31px;
+    background: red;
+    z-index: 1000;
+    position: absolute;
+    visibility: visible;
+}
+*/
+/*
+.toolbar-buttons {
+    --original-toolbar-buttons-background-height: 127;
+    --height-without-increase: 32;
+    --toolbar-buttons-height: calc(var(--height-without-increase) + var(--increase-bar-by));
+    --toolbar-buttons-scale: calc(var(--toolbar-buttons-height) / var(--original-toolbar-buttons-background-height));
+
+    box-sizing: content-box;
+    display: flex;
+
+    height: var(--toolbar-buttons-height);
+    aspect-ratio: 585 / var(--original-toolbar-buttons-background-height);
+
+    background-size: contain;
+    background-repeat: no-repeat;
+    padding: calc(24px * var(--toolbar-buttons-scale))
+             calc(40px * var(--toolbar-buttons-scale))
+             calc(25px * var(--toolbar-buttons-scale))
+             calc(42px * var(--toolbar-buttons-scale));
+
+    gap: calc(29px * var(--toolbar-buttons-scale));
+}
+
+.toolbar-buttons > * {
+    aspect-ratio: 1 / 1;
+    height: calc(77px * var(--toolbar-buttons-scale));
+    overflow: hidden;
+}
+ */

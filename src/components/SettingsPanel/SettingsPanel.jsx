@@ -80,6 +80,9 @@ export default function SettingsPanel({}) {
         setSettings(newSettings);
         DiscordAPI.settings = newSettings;
         DiscordAPI.saveSettings();
+        
+        const closeButton = document.querySelector('.bd-modal-root:has( .tanksquad-call-trigger) .bd-modal-footer .bd-button');
+        closeButton.click();
     };
 
     return (
