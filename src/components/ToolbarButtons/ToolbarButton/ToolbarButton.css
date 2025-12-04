@@ -13,3 +13,9 @@
     width: auto;
     object-fit: contain;
 }
+
+.toolbar-button-disabled {
+    cursor: not-allowed;
+    opacity: 0.4;
+    filter: grayscale(80%);
+}

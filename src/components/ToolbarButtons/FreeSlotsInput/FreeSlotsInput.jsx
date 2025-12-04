@@ -3,9 +3,8 @@ const { useEffect, useRef, useMemo } = BdApi.React;
 
 import DiscordApi from '../../../discord-api/DiscordAPI';
 import './FreeSlotsInput.css';
-import ToolbarButton from "@/components/ToolbarButtons/ToolbarButton/ToolbarButton";
 
-import free_slots_icon from "@/assets/Dancing_in_the_Moonlight_Poro_profileicon.png";
+import free_slots_icon from '@/assets/Dancing_in_the_Moonlight_Poro_profileicon.png';
 
 const AUTO_UPDATE_DELAY = 15_000;
 const AUTO_UPDATE_RATE = 50;
@@ -17,8 +16,13 @@ export default function FreeSlotsInput({ value, onValueChange }) {
         if (!shouldAutoUpdateFreeSlots.current) {
             return;
         }
-        
-        onValueChange(Math.max(1, DiscordApi.getCurrentFreeSlots()));
+
+        const currentFreeSlots = DiscordApi.getCurrentFreeSlots();
+        if (Number.isInteger(currentFreeSlots)) {
+            onValueChange(Math.max(1, currentFreeSlots));
+        } else {
+            onValueChange(currentFreeSlots);
+        }
     };
 
     // Create debounced function to resume auto-updates after AUTO_UPDATE_DELAY ms
@@ -28,18 +32,6 @@ export default function FreeSlotsInput({ value, onValueChange }) {
         }, AUTO_UPDATE_DELAY),
         []
     );
-
-    const handleInputChange = (event) => {
-        const newValue = parseInt(event.target.value, 10);
-        if (isNaN(newValue)) {
-            return;
-        }
-
-        shouldAutoUpdateFreeSlots.current = false;
-        debouncedResumeAutoUpdateFunction();
-
-        onValueChange(Math.max(1, newValue));
-    };
 
     const handleIncrement = () => {
         shouldAutoUpdateFreeSlots.current = false;
@@ -53,6 +45,16 @@ export default function FreeSlotsInput({ value, onValueChange }) {
         onValueChange(Math.max(1, value - 1));
     };
 
+    const handleClick = (event) => {
+        event.preventDefault();
+        handleIncrement();
+    };
+
+    const handleContextMenu = (event) => {
+        event.preventDefault();
+        handleDecrement();
+    };
+
     useEffect(() => {
         updateFreeSlots();
         const intervalID = setInterval(updateFreeSlots, AUTO_UPDATE_RATE);
@@ -63,39 +65,18 @@ export default function FreeSlotsInput({ value, onValueChange }) {
         };
     }, []);
 
+    const hasSpecifiedFreeSlots = value !== null;
+
     return (
-        <div className="free-slots-input-container">
-            <ToolbarButton>
-                <img src={free_slots_icon} className="pointer-events-none" alt="Количество свободных мест"/>
-            </ToolbarButton>
-            {/*
-            }
-            <input
-                className="discord-input discord-text-input free-slots-input use-custom-spinners"
-                type="number"
-                value={value}
-                onChange={handleInputChange}
-                min="1"
-            />
-            <div className="free-slots-spinner-buttons">
-                <button 
-                    className="free-slots-spinner-button" 
-                    onClick={handleIncrement}
-                    type="button"
-                    aria-label="Increment"
-                >
-                    ▲
-                </button>
-                <button 
-                    className="free-slots-spinner-button" 
-                    onClick={handleDecrement}
-                    type="button"
-                    aria-label="Decrement"
-                >
-                    ▼
-                </button>
+        <div 
+            className={`free-slots-input-container ${hasSpecifiedFreeSlots ? 'free-slots-input-container-has-specified-number' : ''}`}
+            onClick={handleClick}
+            onContextMenu={handleContextMenu}
+        >
+            <div className="free-slots-foreground">
+                <span className="free-slots-value">{value}</span>
             </div>
-            */}
+            <img src={free_slots_icon} className="pointer-events-none free-slots-background" alt="Количество свободных мест"/>
         </div>
     );
 }

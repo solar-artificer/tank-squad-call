@@ -336,7 +336,7 @@ class DiscordAPI {
         try {
             const voiceChannelInfo = this.getCurrentVoiceChannel();
             if (!voiceChannelInfo) {
-                return 0;
+                return null;
             }
 
             const currentUserCount = this.getVoiceChannelUserCount(voiceChannelInfo.guild_id, voiceChannelInfo.id);
@@ -344,7 +344,7 @@ class DiscordAPI {
             return Math.max(0, freeSlots); // Ensure we don't return negative values
         } catch (error) {
             console.error("TankSquadCall: Error getting current free slots", error);
-            return 0;
+            return null;
         }
     }
 

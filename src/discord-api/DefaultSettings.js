@@ -1,5 +1,5 @@
 export default {
-    serverID: '1010911948226957353',
+    serverID: '213672490491314176',
 
     callChannelID: '446701263464300544',
     callMessageTemplate:

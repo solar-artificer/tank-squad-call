@@ -1,9 +1,9 @@
-.free-slots-input-container {
+.send-call-button {
     position: relative;
     cursor: pointer;
 }
 
-.free-slots-foreground {
+.send-call-cooldown {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -11,18 +11,17 @@
     height: 100%;
     z-index: 2;
 
-
     color: #fff;
     font-weight: bold;
 }
 
-.free-slots-foreground,
-.free-slots-background {
+.send-call-cooldown,
+.send-call-background {
     position: absolute;
     top: 0;
     left: 0;
 }
 
-.free-slots-input-container-has-specified-number .free-slots-background {
+.send-call-button-has-cooldown .send-call-background {
     filter: brightness(40%);
 }

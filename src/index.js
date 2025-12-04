@@ -9,7 +9,7 @@ import settingsPanelStyles from "./components/SettingsPanel/SettingsPanel.css";
 import freeSlotsInputStyles from "./components/ToolbarButtons/FreeSlotsInput/FreeSlotsInput.css";
 import callOptionsButtonStyles from "./components/ToolbarButtons/CallOptionsButton/CallOptionsButton.css";
 import picturePickerStyles from "./components/PicturePicker/PicturePicker.css";
-import slowmodeCooldownStyles from "./components/ToolbarButtons/SlowmodeCooldown/SlowmodeCooldown.css";
+import sendCallButtonStyles from "./components/ToolbarButtons/SendCallButton/SendCallButton.css";
 
 import ToolbarButtons from "./components/ToolbarButtons/ToolbarButtons";
 
@@ -42,7 +42,7 @@ export default class TankSquadCallPlugin {
 
         this.addOverrideLeakedCss();
 
-        const toolbar = document.querySelector('[class*="appAsidePanelWrapper_"] [class*="bar_"] [class*="trailing_"]');
+        const toolbar = document.querySelector('[class*="appAsidePanelWrapper_"]  [class*="base_"] > [class*="bar_"] [class*="trailing_"]');
         if (toolbar !== null) {
             this.addToolbarButtons();
         }
@@ -63,7 +63,7 @@ export default class TankSquadCallPlugin {
                     for (const addedNode of mutation.addedNodes) {
                         if (
                             addedNode.nodeType === Node.ELEMENT_NODE
-                            && addedNode.matches('[class*="appAsidePanelWrapper_"] [class*="bar_"]')
+                            && addedNode.matches('[class*="appAsidePanelWrapper_"]  [class*="base_"] > [class*="bar_"]')
                         ) {
                             this.addToolbarButtons();
                         }
@@ -104,7 +104,7 @@ export default class TankSquadCallPlugin {
             this._toolbarButtonsContainerElement.remove();
         }
 
-        const toolbar = document.querySelector('[class*="appAsidePanelWrapper_"] [class*="bar_"] [class*="trailing_"]');
+        const toolbar = document.querySelector('[class*="appAsidePanelWrapper_"]  [class*="base_"] > [class*="bar_"] [class*="trailing_"]');
 
         this._toolbarButtonsContainerElement = BdApi.DOM.parseHTML("<div class='toolbar-buttons-container' style='position: relative; z-index: 10000; overflow: visible;'>");
         toolbar.prepend(this._toolbarButtonsContainerElement);
@@ -125,7 +125,7 @@ export default class TankSquadCallPlugin {
             + toolbarButtonStyles
             + freeSlotsInputStyles
             + callOptionsButtonStyles
-            + slowmodeCooldownStyles;
+            + sendCallButtonStyles;
         shadow.append(styleElement);
 
         const toolbarButtonsReactRootElement = BdApi.DOM.parseHTML("<div class='toolbar-buttons-react-root'>");
