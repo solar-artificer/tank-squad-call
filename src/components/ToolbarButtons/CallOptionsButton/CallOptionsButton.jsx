@@ -6,6 +6,7 @@ import './CallOptionsButton.css';
 import callOptionsButtonStyles from "./CallOptionsButton.css";
 
 import change_message_template_icon from '@/assets/Lunar_Revel_Scroll_profileicon.jpg';
+import gameEndViewBackground from '@/assets/GameEndView_Background.png';
 
 const {useState, useEffect, useRef} = BdApi.React;
 
@@ -64,7 +65,10 @@ export default function CallOptionsButton() {
                 </ToolbarButton>
             </PopoverButton>
 
-            <PopoverPanel anchor="bottom end" className="call-options-dropdown" onClick={handlePanelClick}>
+            <PopoverPanel anchor="bottom end" className="call-options-dropdown" onClick={handlePanelClick}
+                          style={{
+                              backgroundImage: `url(${gameEndViewBackground})`
+                          }}>
                 <style>
                     {callOptionsButtonStyles}
                 </style>

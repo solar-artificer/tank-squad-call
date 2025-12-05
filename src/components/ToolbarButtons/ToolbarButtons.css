@@ -21,24 +21,14 @@
     background-repeat: no-repeat;
     padding-top: 11px;
     padding-left: 17px;
-    /*
-        17px
-        11px
-        17px;
-*/
-    gap: 11px;
+    gap: 9.5px;
 }
 
 .toolbar-buttons nav > * {
-    height: 28px;
-    width: 28px;
+    height: 29px;
+    width: 29px;
     flex-shrink: 0;
     overflow: hidden;
-    /*
-    position: relative;
-    visibility: hidden;
-
-     */
 }
 /*
 
