@@ -1,7 +1,5 @@
 import classNames from 'classnames';
 
-import './ToolbarButton.css';
-
 export default function ToolbarButton({ children, className, onClick, disabled }) {
     return (
         <button 

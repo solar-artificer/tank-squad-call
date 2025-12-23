@@ -5,7 +5,7 @@
     align-items: center;
 }
 
-.toolbar-buttons nav {
+.toolbar-buttons .toolbar-menu {
     --original-toolbar-buttons-background-height: 127;
     --height-without-increase: 32;
     --toolbar-buttons-height: calc(var(--height-without-increase) + var(--increase-bar-by));
@@ -24,11 +24,15 @@
     gap: 9.5px;
 }
 
-.toolbar-buttons nav > * {
+.toolbar-buttons .toolbar-menu > * {
     height: 29px;
     width: 29px;
     flex-shrink: 0;
     overflow: hidden;
+}
+
+.toolbar-buttons > .divider {
+    margin-left: 22px;
 }
 /*
 

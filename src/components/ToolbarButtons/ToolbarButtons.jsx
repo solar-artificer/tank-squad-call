@@ -1,24 +1,26 @@
 const { useState } = BdApi.React;
 
-import forge_menu from '../../assets/Forge_Menu.png';
+import forge_menu from '@/assets/Forge_Menu.png';
+
 import CreateChannelButton from './CreateChannelButton/CreateChannelButton';
 import SendCallButton from './SendCallButton/SendCallButton';
-import CallOptionsButton from './CallOptionsButton/CallOptionsButton';
+import EditMessageTemplate from './EditMessageTemplateButton/EditMessageTemplate';
 import FreeSlotsInput from './FreeSlotsInput/FreeSlotsInput';
+import Divider from './Divider/Divider';
 
 export default function ToolbarButtons() {
     const [freeSlots, setFreeSlots] = useState(null);
 
     return (
         <div className="toolbar-buttons">
-            <nav style={{ backgroundImage: `url(${forge_menu})` }}>
+            <div className="toolbar-menu" style={{ backgroundImage: `url(${forge_menu})` }}>
                 <CreateChannelButton />
                 <SendCallButton freeSlots={freeSlots} />
                 <FreeSlotsInput value={freeSlots} onValueChange={setFreeSlots} />
-                <CallOptionsButton />
-            </nav>
+                <EditMessageTemplate />
+            </div>
 
-            <div className={"divider"} style={{marginLeft: '22px'}}/>
+            <Divider/>
         </div>
     );
 }

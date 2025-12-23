@@ -1,12 +1,11 @@
-import { Field, Label, Textarea, Input  } from '@headlessui/react'
-
 const { useState, useEffect } = BdApi.React;
 
-import DiscordAPI from "../../discord-api/DiscordAPI";
+import DiscordAPI from "@/discord-api/DiscordAPI";
+
+import { Field, Label } from '@headlessui/react'
 import DiscordComboBox from "@/components/DiscordComboBox/DiscordComboBox";
 import PicturePicker from "@/components/PicturePicker/PicturePicker";
 
-import './SettingsPanel.css';
 
 export default function SettingsPanel({}) {
     const [settings, setSettings] = useState(DiscordAPI.settings);
@@ -16,63 +15,14 @@ export default function SettingsPanel({}) {
 
     // Load servers on mount
     useEffect(() => {
-        let guilds = [];
-
-        try {
-            const sortedGuildIds = DiscordAPI.discordInternals.SortedGuildStore.getFlattenedGuildIds();
-            guilds = sortedGuildIds
-                .map(guildId => {
-                    const guild = DiscordAPI.discordInternals.GuildStore.getGuild(guildId);
-
-                    if (!guild) {
-                        return null;
-                    }
-
-                    return guild;
-                })
-                .filter(guild => guild !== null);
-        } catch (error) {
-            console.error(error)
-            guilds = DiscordAPI.discordInternals.GuildStore.getGuilds();
-        }
-
-        const serverList = Object.values(guilds).map(guild => ({
-            id: guild.id,
-            name: guild.name,
-            image: guild.icon ? `https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.webp?size=32` : null
-        }));
-        
-        console.log('GUILDS');
-        console.log(serverList);
-        setServers(serverList);
+        setServers(DiscordAPI.getSortedServers());
     }, []);
 
     // Load channels when server changes
     useEffect(() => {
-        if (!settings.serverID) return;
-
-        try {
-            const guildChannels = DiscordAPI.discordInternals.GuildChannelStore.getChannels(settings.serverID);
-            
-            // Get voice channels
-            const voiceChannelList = guildChannels.VOCAL?.map(channelData => ({
-                id: channelData.channel.id,
-                name: channelData.channel.name
-            })) || [];
-            
-            // Get text channels
-            const textChannelList = guildChannels.SELECTABLE?.map(channelData => ({
-                id: channelData.channel.id,
-                name: channelData.channel.name
-            })) || [];
-
-            setVoiceChannels(voiceChannelList);
-            setTextChannels(textChannelList);
-        } catch (error) {
-            console.error('Error loading channels:', error);
-            setVoiceChannels([]);
-            setTextChannels([]);
-        }
+        const { voiceChannels, textChannels } = DiscordAPI.getChannelsForServer(settings.serverID);
+        setVoiceChannels(voiceChannels);
+        setTextChannels(textChannels);
     }, [settings.serverID]);
 
     const updateSetting = (key, value) => {
@@ -80,9 +30,6 @@ export default function SettingsPanel({}) {
         setSettings(newSettings);
         DiscordAPI.settings = newSettings;
         DiscordAPI.saveSettings();
-        
-        const closeButton = document.querySelector('.bd-modal-root:has( .tanksquad-call-trigger) .bd-modal-footer .bd-button');
-        closeButton.click();
     };
 
     return (

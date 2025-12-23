@@ -4,8 +4,6 @@ import DiscordApi from '@/discord-api/DiscordAPI';
 
 import ToolbarButton from "../ToolbarButton/ToolbarButton.jsx";
 
-import './SendCallButton.css';
-
 import call_icon from '@/assets/Ornn_Call_of_the_Forge_God_HD.png';
 
 export default function SendCallButton({freeSlots}) {
@@ -13,48 +11,42 @@ export default function SendCallButton({freeSlots}) {
     const [isInVoiceChat, setIsInVoiceChat] = useState(false);
 
     useEffect(() => {
-        const updateStatus = () => {
-            // Check if user is in a voice channel
+        const updateVoiceStatus = () => {
             const currentVoiceChannel = DiscordApi.getCurrentVoiceChannel();
             setIsInVoiceChat(currentVoiceChannel !== null);
-
-            // Get the call channel ID from settings
-            const channelId = DiscordApi.settings.callChannelID;
-
-            if (!channelId) {
-                setCooldown(0);
-                return;
-            }
-
-            const remainingTime = DiscordApi.getSlowModeCooldown(channelId);
-
-            if (remainingTime) {
-                setCooldown(Math.floor(remainingTime / 1000));
-            } else {
-                setCooldown(0);
-            }
         };
 
-        updateStatus();
-
-        const intervalId = setInterval(updateStatus, 25);
+        updateVoiceStatus();
+        const intervalId = setInterval(updateVoiceStatus, 25);
 
         return () => clearInterval(intervalId);
     }, []);
 
-    const hasCooldown = cooldown !== 0;
-    const isDisabled = !isInVoiceChat || hasCooldown;
+    useEffect(() => {
+        const updateCooldown = () => {
+            const remainingTime = DiscordApi.getSlowModeCooldown(DiscordApi.settings.callChannelID);
+            setCooldown(remainingTime ? Math.floor(remainingTime / 1000) : 0);
+        };
+
+        updateCooldown();
+        const intervalId = setInterval(updateCooldown, 25);
+
+        return () => clearInterval(intervalId);
+    }, []);
+
+    const isOnCooldown = cooldown !== 0;
+    const isDisabled = isOnCooldown || !isInVoiceChat;
 
     const handleSendCall = () => {
-        DiscordApi.sendCall(freeSlots);
+        DiscordApi.sendCallMessage(freeSlots);
     };
 
     return (
         <ToolbarButton onClick={handleSendCall}
-                       className={`send-call-button ${hasCooldown ? 'send-call-button-has-cooldown' : ''}`}
+                       className={`send-call-button ${isOnCooldown ? 'send-call-button-has-cooldown' : ''}`}
                        disabled={isDisabled}>
-            <img src={call_icon} className="pointer-events-none send-call-background" alt="Запостить объявление"/>
-            {hasCooldown && (
+            <img src={call_icon} className="send-call-background pointer-events-none" alt="Запостить объявление"/>
+            {isOnCooldown && (
                 <span className="send-call-cooldown">{cooldown}</span>
             )}
         </ToolbarButton>

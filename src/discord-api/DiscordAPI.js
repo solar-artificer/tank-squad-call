@@ -1,27 +1,25 @@
 import defaultSettings from "./DefaultSettings";
 
 class DiscordAPI {
+    static PLUGIN_NAME = "TankSquadCall";
+    static SETTINGS_KEY = 'settings';
+
+    static SUCCESSFUL_CHANGE_CHANNEL_POLLING_RATE = 50;
+
     constructor() {
         this.loadSettings();
-        console.log('SETTINGS');
-        console.log(this.settings);
+        this.log('Настройки', this.settings);
 
         this.discordInternals = this.getDiscordInternals();
-
-        window.discordInternals = this.discordInternals;
-        console.log('DISCORD INTERNALS');
-        console.log(this.discordInternals);
     }
 
     loadSettings() {
-        // TODO Constants/typescript
-        const userPersistedSettings = BdApi.Data.load("TankSquadCall", "settings");
+        const userPersistedSettings = BdApi.Data.load(DiscordAPI.PLUGIN_NAME, DiscordAPI.SETTINGS_KEY);
         this.settings = Object.assign({}, defaultSettings, userPersistedSettings);
     }
 
     saveSettings() {
-        // TODO Constants/typescript
-        BdApi.Data.save("TankSquadCall", "settings", this.settings);
+        BdApi.Data.save(DiscordAPI.PLUGIN_NAME, DiscordAPI.SETTINGS_KEY, this.settings);
     }
 
     getDiscordInternals() {
@@ -33,21 +31,10 @@ class DiscordAPI {
         const UserStore = BdApi.Webpack.getStore('UserStore');
         const SlowmodeStore = BdApi.Webpack.getStore('SlowmodeStore');
 
-        // Find the VoiceStateActions module - try multiple methods
-        let VoiceActions = BdApi.Webpack.getModule(
+        const VoiceActions = BdApi.Webpack.getModule(
             m => m.selectVoiceChannel,
             {searchExports: true}
         );
-
-        if (!VoiceActions) {
-            VoiceActions = BdApi.Webpack.getModule(
-                m => m.default?.selectVoiceChannel,
-                {searchExports: true}
-            );
-            if (VoiceActions) {
-                VoiceActions = VoiceActions.default;
-            }
-        }
 
         const MessageActions = BdApi.Webpack.getModule(
             m => m.sendMessage && m.receiveMessage,
@@ -67,175 +54,172 @@ class DiscordAPI {
             VoiceStateStore,
             UserStore,
             SlowmodeStore,
+
             VoiceActions,
             MessageActions,
+
             CloudUploader
         }
     }
 
-    sendCall(freeSlots) {
-        const callMessage = {
-            content: this.constructCallMessage(freeSlots),
-            tts: false,
-            invalidEmojis: [],
-            validNonShortcutEmojis: [],
-            // Add unique nonce
-            nonce: Date.now().toString() + Math.random().toString(36)
-        };
+    sendCallMessage(freeSlots) {
+        try {
+            const callMessage = {
+                content: this.composeCallMessage(freeSlots),
+                tts: false,
+                invalidEmojis: [],
+                validNonShortcutEmojis: [],
+                nonce: this.generateNonce()
+            };
 
-        this.discordInternals.MessageActions.sendMessage(this.settings.callChannelID, callMessage, undefined, {});
+            this.discordInternals.MessageActions.sendMessage(
+                this.settings.callChannelID,
+                callMessage,
+                undefined,
+                {}
+            );
+        } catch (error) {
+            this.showToast(`Произошла ошибка при послании сообщения: "${error.message}"`, "error");
+            this.logError(`Произошла ошибка при послании сообщения: "${error.message}"`);
+        }
     }
 
-    constructCallMessage(amountOfFreeSlots) {
-        const voiceChannelInfo = this.getCurrentVoiceChannel();
-        if (!voiceChannelInfo) {
-            // TODO Error handling
-            return;
+    composeCallMessage(amountOfFreeSlots) {
+        const currentVoiceChannel = this.getCurrentVoiceChannel();
+        if (!currentVoiceChannel) {
+            throw new Error("Не найден текущий активній войс чат");
         }
 
-        let currentVoiceChannelLink = `https://discord.com/channels/${voiceChannelInfo.guild_id}/${voiceChannelInfo.id}`;
+        const currentVoiceChannelLink = `https://discord.com/channels/${currentVoiceChannel.guild_id}/${currentVoiceChannel.id}`;
 
-        const message = this.settings.callMessageTemplate
+        return this.settings.callMessageTemplate
             .replaceAll('FREE_SLOTS', amountOfFreeSlots.toString())
             .replaceAll('LINK', currentVoiceChannelLink);
-
-        return message;
     }
 
     createTankSquadChannel() {
-        const didSuccessfullyJoin = this.joinVoiceChannel(this.settings.serverID, this.settings.createVoiceChannelChannelID);
-        if (!didSuccessfullyJoin) {
-            return;
+        try {
+            const initialVoiceChannelID = this.getCurrentVoiceChannel()?.id;
+
+            this.joinVoiceChannel(this.settings.createVoiceChannelChannelID);
+
+            let unsuccessfulChecks = 0;
+            const intervalID = setInterval(() => {
+                const currentVoiceChannelID = this.getCurrentVoiceChannel()?.id;
+
+                if (
+                    currentVoiceChannelID === null || currentVoiceChannelID === undefined
+                    || currentVoiceChannelID === this.settings.createVoiceChannelChannelID
+                    || currentVoiceChannelID === initialVoiceChannelID
+                ) {
+                    unsuccessfulChecks++;
+
+                    if (unsuccessfulChecks >= 50) {
+                        this.showToast(`Произошла ошибка при создании канала`, "error");
+                        this.logError(`Произошла ошибка при создании канала`);
+                        clearInterval(intervalID);
+                    }
+
+                    return;
+                }
+
+                clearInterval(intervalID);
+                this.postPictureToVoiceChannel(
+                    this.settings.serverID,
+                    currentVoiceChannelID,
+                    this.settings.tankPoolPictureUrl
+                );
+            }, DiscordAPI.SUCCESSFUL_CHANGE_CHANNEL_POLLING_RATE);
+        } catch (error) {
+            this.showToast(`Произошла ошибка при создании канала: "${error.message}"`, "error");
+            this.logError(`Произошла ошибка при создании канала: "${error.message}"`);
         }
-
-        const interval = setInterval(() => {
-            let currentVoiceChannelID = this.getCurrentVoiceChannel()?.id;
-
-            if (
-                currentVoiceChannelID === null
-                || currentVoiceChannelID === undefined
-
-                || currentVoiceChannelID === this.settings.createVoiceChannelChannelID
-            ) {
-                return;
-            }
-
-            clearInterval(interval);
-            this.postPictureToVoiceChannel(
-                this.settings.serverID,
-                currentVoiceChannelID,
-                this.settings.tankPoolPictureUrl
-            );
-        }, 15);
     }
 
-    joinVoiceChannel(serverId, channelId) {
-        console.log(`Attempting to join voice channel ${channelId} in server ${serverId}`);
-
-        try {
-            if (!this.discordInternals.VoiceActions) {
-                throw new Error("Could not find voice actions module!");
-            }
-
-            // Verify the server exists
-            const guild = this.discordInternals.GuildStore.getGuild(serverId);
-            if (!guild) {
-                throw new Error(`Server with ID ${serverId} not found!`);
-            }
-
-            // Verify the channel exists
-            const channel = this.discordInternals.ChannelStore.getChannel(channelId);
-            if (!channel) {
-                throw new Error(`Channel with ID ${channelId} not found!`);
-            }
-
-            // Check if it's a voice channel (type 2 = voice, type 13 = stage)
-            if (channel.type !== 2 && channel.type !== 13) {
-                throw new Error(`Channel "${channel.name}" is not a voice channel!`);
-            }
-
-            console.log(`Joining voice channel: ${channel.name} in ${guild.name}`);
-            this.discordInternals.VoiceActions.selectVoiceChannel(channelId);
-            console.log(`TankSquadCall: Successfully joined ${channel.name}`);
-
-            return true;
-
-        } catch (error) {
-            this.showToast(`Произошла ошибка при подключении к войс чату: ${error.message}`, "error");
-            console.error("TankSquadCall Error:", error);
-            return false;
+    joinVoiceChannel(channelId) {
+        // Verify the channel exists
+        const channel = this.discordInternals.ChannelStore.getChannel(channelId);
+        if (!channel) {
+            throw new Error(`Не нашёл канала с ID ${channelId}!`);
         }
+
+        // Check if it's a voice channel (type 2 = voice, type 13 = stage)
+        if (
+            channel.type !== 2
+            && channel.type !== 13
+        ) {
+            throw new Error(`Канал "${channel.name}" не голосовой!`);
+        }
+
+        this.log(`Пытаюсь подключиться к войс чату c ID ${channelId}...`);
+        this.discordInternals.VoiceActions.selectVoiceChannel(channelId);
+        this.log(`Успешно получилось подключиться к войс чату ${channel.name}!`);
     }
 
     // Post picture to a specific voice channel (finds associated text channel)
     // Supports both URL and Base64 encoded images
-    async postPictureToVoiceChannel(serverId, voiceChannelId, pictureData) {
-        try {
-            console.log(`Posting picture to voice channel ${voiceChannelId}`);
+    async postPictureToVoiceChannel(serverId, voiceChannelId, pictureUrl) {
+        this.log(`Пытаюсь запостить картинку в войс чате c ID ${voiceChannelId}`);
 
-            const voiceChannel = this.discordInternals.ChannelStore.getChannel(voiceChannelId);
-            if (!voiceChannel) {
-                throw new Error(`Could not find voice channel info!`);
+        const voiceChannel = this.discordInternals.ChannelStore.getChannel(voiceChannelId);
+        if (!voiceChannel) {
+            throw new Error(`Не нашёл войс чата c ID ${voiceChannelId}!`);
+        }
+
+        const targetTextChannel = this.getTextChannelForVoiceChannel(voiceChannel);
+        if (!targetTextChannel) {
+            throw new Error(`Не нашёл подходящего текстового канала!`);
+        }
+
+        const file = await this.getFileFromPictureUrl(pictureUrl);
+        const cloudUploader = new this.discordInternals.CloudUploader(
+            {
+                file: file,
+                platform: 1
+            },
+            targetTextChannel.id,
+            false,
+            0
+        );
+        await cloudUploader.upload();
+
+        this.discordInternals.MessageActions.sendMessage(
+            targetTextChannel.id,
+            {
+                content: '',
+                tts: false,
+                invalidEmojis: [],
+                validNonShortcutEmojis: [],
+                nonce: this.generateNonce()
+            },
+            undefined,
+            {
+                attachmentsToUpload: [cloudUploader]
             }
+        );
 
-            const targetTextChannel = this.getTextChannelForVoiceChannel(voiceChannel);
-            if (!targetTextChannel) {
-                throw new Error(`Could not find a text channel to post in!`);
-            }
+        this.showToast(`Запостил картинку`, "success");
+        this.log(`Запостил картинку в канал с ID ${targetTextChannel.id}`);
+    }
 
-            if (!this.discordInternals.MessageActions) {
-                throw new Error(`Could not find message actions module!`);
-            }
+    async getFileFromPictureUrl(pictureUrl) {
+        if (pictureUrl.startsWith('data:image/')) {
+            // Handle Base64 - convert to file
+            return this.base64ToFile(pictureUrl);
+        } else {
+            // Handle URL - fetch and convert to file
+            const response = await fetch(pictureUrl);
+            const blob = await response.blob();
+            const mimeType = blob.type || 'image/png';
+            const extension = mimeType.split('/')[1] || 'png';
 
-            let file;
-
-            // Check if pictureData is base64 or URL
-            if (pictureData.startsWith('data:image/')) {
-                // Handle Base64 - convert to file
-                file = this.base64ToFile(pictureData);
-            } else {
-                // Handle URL - fetch and convert to file
-                const response = await fetch(pictureData);
-                const blob = await response.blob();
-                const mimeType = blob.type || 'image/png';
-                const extension = mimeType.split('/')[1] || 'png';
-                file = new File([blob], `image.${extension}`, {type: mimeType});
-            }
-
-            const pictureUploader = new this.discordInternals.CloudUploader(
+            return new File(
+                [blob],
+                `image.${extension}`,
                 {
-                    file: file,
-                    platform: 1
-                },
-                targetTextChannel.id,
-                false,
-                0
-            );
-
-            await pictureUploader.upload();
-
-            this.discordInternals.MessageActions.sendMessage(
-                targetTextChannel.id,
-                {
-                    content: '',
-                    tts: false,
-                    invalidEmojis: [],
-                    validNonShortcutEmojis: [],
-                    nonce: Date.now().toString() + Math.random().toString(36)
-                },
-                undefined,
-                {
-                    attachmentsToUpload: [pictureUploader]
+                    type: mimeType
                 }
             );
-
-            this.showToast(`Запостил картинку`, "success");
-            console.log(`TankSquadCall: Picture posted to channel ${targetTextChannel.id}`);
-            return true;
-        } catch (error) {
-            this.showToast(`Произошла ошибка при постинге картинки: ${error.message}`, "error");
-            console.error("TankSquadCall Error:", error);
-            return false;
         }
     }
 
@@ -244,7 +228,7 @@ class DiscordAPI {
         // Extract mime type and base64 content
         const matches = base64Data.match(/^data:([^;]+);base64,(.+)$/);
         if (!matches) {
-            throw new Error('Invalid base64 image format');
+            throw new Error('Невалидная картинка в формате Base64');
         }
 
         const mimeType = matches[1];
@@ -264,87 +248,105 @@ class DiscordAPI {
         const blob = new Blob([byteArray], {type: mimeType});
 
         // Create and return File object from Blob
-        return new File([blob], filename, {type: mimeType});
+        return new File(
+            [blob],
+            filename,
+            {
+                type: mimeType
+            }
+        );
     }
 
     getTextChannelForVoiceChannel(voiceChannel) {
-        try {
-            if (!this.discordInternals.GuildChannelStore) {
-                throw new Error(`GuildChannelStore not available!`);
-            }
+        const allGuildChannels = this.discordInternals.GuildChannelStore.getChannels(voiceChannel.guild_id);
+        const guildTextChannelsForVoiceChannels = allGuildChannels['VOCAL'];
 
-            const allGuildChannels = this.discordInternals.GuildChannelStore.getChannels(voiceChannel.guild_id);
-            const guildTextChannelsForVoiceChannels = allGuildChannels['VOCAL'];
-
-            return guildTextChannelsForVoiceChannels.find(
-                channelCandidate => channelCandidate.channel.id === voiceChannel.id
-            )?.channel;
-        } catch (error) {
-            console.error("TankSquadCall: Error getting text channel for voice channel", error);
-            return null;
-        }
+        return guildTextChannelsForVoiceChannels.find(
+            channelCandidate => channelCandidate.channel.id === voiceChannel.id
+        )?.channel;
     }
 
     getCurrentVoiceChannel() {
-        try {
-            if (!this.discordInternals.UserStore) {
-                throw new Error(`UserStore not available!`);
-            }
-            const currentUser = this.discordInternals.UserStore.getCurrentUser();
+        const currentUser = this.discordInternals.UserStore.getCurrentUser();
+        if (!currentUser) {
+            throw new Error('Не получилось получить текущего пользователя!');
+        }
 
-            if (!currentUser) {
-                throw new Error(`Could not get current user!`);
-            }
-
-            if (!this.discordInternals.VoiceStateStore) {
-                throw new Error(`VoiceStateStore not available!`);
-            }
-
-            const currentVoiceState = this.discordInternals.VoiceStateStore.getVoiceStateForUser(currentUser.id)
-            if (!currentVoiceState) {
-                return null;
-            }
-
-            const currentVoiceChannel = this.discordInternals.ChannelStore.getChannel(currentVoiceState.channelId);
-            return currentVoiceChannel;
-        } catch (error) {
-            console.error("TankSquadCall: Error getting current voice channel", error);
+        const currentVoiceState = this.discordInternals.VoiceStateStore.getVoiceStateForUser(currentUser.id)
+        if (!currentVoiceState) {
             return null;
         }
+
+        return this.discordInternals.ChannelStore.getChannel(currentVoiceState.channelId);
     }
 
     getVoiceChannelUserCount(guildId, channelId) {
-        try {
-            if (!this.discordInternals.VoiceStateStore) {
-                throw new Error(`VoiceStateStore not available!`);
-            }
-
-            const voiceStates = this.discordInternals.VoiceStateStore.getVoiceStatesForChannel(channelId);
-            if (!voiceStates) {
-                throw new Error(`Couldn't get voice states for channel ${channelId}!`);
-            }
-
-            const userCount = Object.keys(voiceStates).length;
-            return userCount;
-        } catch (error) {
-            console.error("TankSquadCall: Error getting voice channel user count", error);
-            return 0;
+        const voiceStates = this.discordInternals.VoiceStateStore.getVoiceStatesForChannel(channelId);
+        if (!voiceStates) {
+            throw new Error(`Не получилось получить количество пользователей в войс чате!`);
         }
+
+        return Object.keys(voiceStates).length;
     }
 
     getCurrentFreeSlots() {
-        try {
-            const voiceChannelInfo = this.getCurrentVoiceChannel();
-            if (!voiceChannelInfo) {
-                return null;
-            }
-
-            const currentUserCount = this.getVoiceChannelUserCount(voiceChannelInfo.guild_id, voiceChannelInfo.id);
-            const freeSlots = 5 - currentUserCount;
-            return Math.max(0, freeSlots); // Ensure we don't return negative values
-        } catch (error) {
-            console.error("TankSquadCall: Error getting current free slots", error);
+        const currentVoiceChannel = this.getCurrentVoiceChannel();
+        if (!currentVoiceChannel) {
             return null;
+        }
+
+        const currentUserCount = this.getVoiceChannelUserCount(currentVoiceChannel.guild_id, currentVoiceChannel.id);
+        // This is only the default
+        const freeSlots = 5 - currentUserCount;
+
+        // Ensure we don't return negative values
+        return Math.max(0, freeSlots);
+    }
+
+    getSortedServers() {
+        const sortedGuildIds = this.discordInternals.SortedGuildStore.getFlattenedGuildIds();
+
+        return sortedGuildIds
+            .map(guildId => {
+                const guild = this.discordInternals.GuildStore.getGuild(guildId);
+                if (!guild) return null;
+
+                return {
+                    id: guild.id,
+                    name: guild.name,
+                    image: guild.icon
+                        ? `https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.webp?size=32`
+                        : null
+                };
+            })
+            .filter(guild => guild !== null);
+    }
+
+    getChannelsForServer(serverID) {
+        if (!serverID) {
+            return {
+                voiceChannels: [],
+                textChannels: []
+            };
+        }
+
+        try {
+            const guildChannels = this.discordInternals.GuildChannelStore.getChannels(serverID);
+
+            const voiceChannels = guildChannels.VOCAL?.map(channelData => ({
+                id: channelData.channel.id,
+                name: channelData.channel.name
+            })) || [];
+
+            const textChannels = guildChannels.SELECTABLE?.map(channelData => ({
+                id: channelData.channel.id,
+                name: channelData.channel.name
+            })) || [];
+
+            return { voiceChannels, textChannels };
+        } catch (error) {
+            this.logError('Ошибка при загрузке чатов:', error);
+            return { voiceChannels: [], textChannels: [] };
         }
     }
 
@@ -354,6 +356,18 @@ class DiscordAPI {
 
     showToast(message, type) {
         BdApi.UI.showToast(message, {type: type});
+    }
+
+    log(...args) {
+        console.log(`[${DiscordAPI.PLUGIN_NAME}]`, ...args);
+    }
+
+    logError(...args) {
+        console.error(`[${DiscordAPI.PLUGIN_NAME}]`, ...args);
+    }
+
+    generateNonce() {
+        return Date.now().toString() + Math.random().toString(36);
     }
 }
 

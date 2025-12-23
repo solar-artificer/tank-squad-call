@@ -1,0 +1,12 @@
+.divider {
+    display: block;
+    -webkit-border-start: 1px solid var(--border-subtle);
+    border-inline-start: 1px solid var(--border-subtle);
+    height: calc(var(--custom-app-top-bar-height) - var(--space-12));
+    margin-inline: var(--space-4);
+}
+
+
+
+
+

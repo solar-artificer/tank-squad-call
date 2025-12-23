@@ -16,6 +16,10 @@
     font-weight: bold;
 }
 
+.free-slots-background {
+    pointer-events: none;
+}
+
 .free-slots-foreground,
 .free-slots-background {
     position: absolute;

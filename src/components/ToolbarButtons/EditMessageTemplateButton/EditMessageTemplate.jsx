@@ -1,44 +1,39 @@
+const {useState, useEffect, useRef} = BdApi.React;
+
+import DiscordAPI from '@/discord-api/DiscordAPI';
+
 import {Popover, PopoverButton, PopoverPanel} from '@headlessui/react';
 import ToolbarButton from "../ToolbarButton/ToolbarButton";
-import DiscordAPI from '../../../discord-api/DiscordAPI';
 
-import './CallOptionsButton.css';
-import callOptionsButtonStyles from "./CallOptionsButton.css";
-
+import editMessageTemplateStyles from "./EditMessageTemplate.css";
 import change_message_template_icon from '@/assets/Lunar_Revel_Scroll_profileicon.jpg';
 import gameEndViewBackground from '@/assets/GameEndView_Background.png';
 
-const {useState, useEffect, useRef} = BdApi.React;
 
-export default function CallOptionsButton() {
+export default function EditMessageTemplate() {
     const [messageTemplate, setMessageTemplate] = useState('');
     const debounceTimerRef = useRef(null);
     const textareaRef = useRef(null);
 
-    // Load the current message template from settings
     useEffect(() => {
         setMessageTemplate(DiscordAPI.settings.callMessageTemplate || '');
     }, []);
 
     // Auto-save with debounce when messageTemplate changes
     useEffect(() => {
-        // Skip on initial mount
         if (messageTemplate === '' || messageTemplate === DiscordAPI.settings.callMessageTemplate) {
             return;
         }
 
-        // Clear existing timer
         if (debounceTimerRef.current) {
             clearTimeout(debounceTimerRef.current);
         }
 
-        // Set new timer
         debounceTimerRef.current = setTimeout(() => {
             DiscordAPI.settings.callMessageTemplate = messageTemplate;
             DiscordAPI.saveSettings();
-        }, 1000); // 1 second debounce
+        }, 1000);
 
-        // Cleanup
         return () => {
             if (debounceTimerRef.current) {
                 clearTimeout(debounceTimerRef.current);
@@ -58,29 +53,30 @@ export default function CallOptionsButton() {
     };
 
     return (
-        <Popover className="call-options-button-container">
+        <Popover className="edit-message-template-button-container">
             <PopoverButton as="div">
                 <ToolbarButton>
                     <img src={change_message_template_icon} className="pointer-events-none" alt="Изменить объявление"/>
                 </ToolbarButton>
             </PopoverButton>
 
-            <PopoverPanel anchor="bottom end" className="call-options-dropdown" onClick={handlePanelClick}
+            <PopoverPanel anchor="bottom end" className="edit-message-template-dropdown" onClick={handlePanelClick}
                           style={{
                               backgroundImage: `url(${gameEndViewBackground})`
                           }}>
+                {/* We portal this out of Shadow DOM, so need to do inject styles here */}
                 <style>
-                    {callOptionsButtonStyles}
+                    {editMessageTemplateStyles}
                 </style>
 
-                <div className="call-options-hint">
+                <div className="edit-message-template-hint">
                     Количество свободных мест - FREE_SLOTS<br/>
                     Ссылка на канал - LINK
                 </div>
 
                 <textarea
                     ref={textareaRef}
-                    className="call-options-textarea"
+                    className="edit-message-template-textarea"
                     rows="6"
                     value={messageTemplate}
                     onChange={(e) => setMessageTemplate(e.target.value)}

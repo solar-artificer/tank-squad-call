@@ -1,7 +1,6 @@
-import {Field, Label} from '@headlessui/react'
-import './PicturePicker.css';
-
 const {useState, useRef} = BdApi.React;
+
+import {Field, Label} from '@headlessui/react'
 
 export default function PicturePicker({value, onChange, label, placeholder}) {
     const [preview, setPreview] = useState(value || null);

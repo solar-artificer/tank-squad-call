@@ -1,8 +1,7 @@
-import debounce from 'lodash/debounce';
 const { useEffect, useRef, useMemo } = BdApi.React;
+import debounce from 'lodash/debounce';
 
-import DiscordApi from '../../../discord-api/DiscordAPI';
-import './FreeSlotsInput.css';
+import DiscordApi from '@/discord-api/DiscordAPI';
 
 import free_slots_icon from '@/assets/Dancing_in_the_Moonlight_Poro_profileicon.png';
 
@@ -76,7 +75,7 @@ export default function FreeSlotsInput({ value, onValueChange }) {
             <div className="free-slots-foreground">
                 <span className="free-slots-value">{value}</span>
             </div>
-            <img src={free_slots_icon} className="pointer-events-none free-slots-background" alt="Количество свободных мест"/>
+            <img src={free_slots_icon} className="free-slots-background" alt="Количество свободных мест"/>
         </div>
     );
 }
