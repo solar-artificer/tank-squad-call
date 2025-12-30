@@ -2,7 +2,7 @@ const { useState, useEffect } = BdApi.React;
 
 import DiscordAPI from "@/discord-api/DiscordAPI";
 
-import {Button, Field, Label} from '@headlessui/react'
+import {Field, Label} from '@headlessui/react'
 import DiscordComboBox from "@/components/DiscordComboBox/DiscordComboBox";
 import PicturePicker from "@/components/PicturePicker/PicturePicker";
 import DiscordSlider from "@/components/DiscordSlider/DiscordSlider";
@@ -104,7 +104,11 @@ export default function SettingsPanel({}) {
                 />
             </Field>
 
-            <button onClick={handleUpdate}>Обновить</button>
+            <div>
+                <button onClick={handleUpdate} className="discord-button discord-button-brand">
+                    Обновить
+                </button>
+            </div>
         </div>
     );
 }

@@ -322,3 +322,43 @@
     cursor: grabbing;
     transform: scale(1.25);
 }
+
+/* Discord Button Styles */
+.discord-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 16px;
+    border: none;
+    border-radius: 3px;
+    font-family: var(--font-primary);
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 16px;
+    cursor: pointer;
+    transition: background-color 0.17s ease, color 0.17s ease;
+    user-select: none;
+}
+
+.discord-button-brand {
+    background-color: var(--brand-500, #5865f2);
+    color: #ffffff;
+}
+
+.discord-button-brand:hover {
+    background-color: var(--brand-560, #4752c4);
+}
+
+.discord-button-brand:active {
+    background-color: var(--brand-600, #3c45a5);
+}
+
+.discord-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.discord-button:focus-visible {
+    outline: 2px solid var(--brand-500, #5865f2);
+    outline-offset: 2px;
+}
