@@ -360,6 +360,7 @@ class DiscordAPI {
     }
 
     async update() {
+        console.log('UPDATE TEST 34');
         const targetFileName = path.join(BdApi.Plugins.folder, "TankSquadCall.plugin.js");
         const updatedSourceCode = await new Promise(async (resolve, reject) => {
             await request(
