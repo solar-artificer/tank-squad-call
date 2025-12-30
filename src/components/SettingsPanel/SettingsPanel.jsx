@@ -35,10 +35,14 @@ export default function SettingsPanel({}) {
 
     const handleUpdate = async () => {
         await DiscordAPI.update();
+
+        const closeButton = document.querySelector('.bd-modal-root:has( .tanksquad-call-settings-panel) .bd-modal-footer .bd-button');
+        closeButton.click();
     };
 
     return (
         <div className="space-y-6 max-w-2xl flex flex-col">
+            <div className="tanksquad-call-trigger"></div>
             <h1 className="font-bold text-xl">
                 Найстроки для Зова ТАНКОСКВАДА
             </h1>
