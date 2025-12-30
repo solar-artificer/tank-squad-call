@@ -104,7 +104,7 @@ export default function SettingsPanel({}) {
                 />
             </Field>
 
-            <button onClick={handleUpdate}>Обновить 23</button>
+            <button onClick={handleUpdate}>Обновить</button>
         </div>
     );
 }
