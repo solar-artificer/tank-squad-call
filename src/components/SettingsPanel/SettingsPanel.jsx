@@ -97,7 +97,7 @@ export default function SettingsPanel({}) {
 
             <Field>
                 <Label className="discord-label block mb-2">
-                    Громкость бурчания Орнннннннннннннна
+                    Громкость бурчания Орна
                 </Label>
                 <DiscordSlider
                     value={settings.ornnRumblingVolume}
