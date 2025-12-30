@@ -36,7 +36,7 @@ export default function SettingsPanel({}) {
     const handleUpdate = async () => {
         await DiscordAPI.update();
 
-        const closeButton = document.querySelector('.bd-modal-root:has( .tanksquad-call-settings-panel) .bd-modal-footer .bd-button');
+        const closeButton = document.querySelector('.bd-modal-root:has( .bd-addon-settings-wrap) .bd-modal-footer .bd-button');
         closeButton.click();
     };
 

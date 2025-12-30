@@ -395,6 +395,11 @@ class DiscordAPI {
             });
 
             console.log(updatedSourceCode);
+            try {
+                console.log(updatedSourceCode.substring(0, 300));
+            } catch (er) {
+
+            }
 
             await fs.writeFile(targetFileName, updatedSourceCode);
             BdApi.Plugins.reload('Зов ТАНКОСКВАДА');

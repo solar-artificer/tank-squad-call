@@ -72,7 +72,6 @@ module.exports = {
         {
             apply: (compiler) => {
                 compiler.hooks.assetEmitted.tap("TankSquadCall Plugin Copy", (filename, info) => {
-                    return;
                     const userHomeDirectory = (() => {
                         if (process.platform === "win32")  {
                             return process.env.APPDATA;
