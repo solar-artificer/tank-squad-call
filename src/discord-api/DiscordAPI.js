@@ -1,5 +1,9 @@
 import defaultSettings from "./DefaultSettings";
 
+
+const path = require('path');
+const fs = require('fs');
+
 class DiscordAPI {
     static PLUGIN_NAME = "TankSquadCall";
     static SETTINGS_KEY = 'settings';
@@ -352,6 +356,11 @@ class DiscordAPI {
 
     getSlowModeCooldown(channelID) {
         return this.discordInternals.SlowmodeStore.getSlowmodeCooldownGuess(channelID);
+    }
+
+    update() {
+        const targetFileName = path.join(BdApi.Plugins.folder, "TankSquadCall.plugin.js");
+        console.log(targetFileName);
     }
 
     showToast(message, type) {

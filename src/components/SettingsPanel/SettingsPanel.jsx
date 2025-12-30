@@ -2,7 +2,7 @@ const { useState, useEffect } = BdApi.React;
 
 import DiscordAPI from "@/discord-api/DiscordAPI";
 
-import { Field, Label } from '@headlessui/react'
+import {Button, Field, Label} from '@headlessui/react'
 import DiscordComboBox from "@/components/DiscordComboBox/DiscordComboBox";
 import PicturePicker from "@/components/PicturePicker/PicturePicker";
 import DiscordSlider from "@/components/DiscordSlider/DiscordSlider";
@@ -31,6 +31,10 @@ export default function SettingsPanel({}) {
         setSettings(newSettings);
         DiscordAPI.settings = newSettings;
         DiscordAPI.saveSettings();
+    };
+
+    const handleUpdate = () => {
+        DiscordAPI.update();
     };
 
     return (
@@ -99,6 +103,8 @@ export default function SettingsPanel({}) {
                     step={0.0001}
                 />
             </Field>
+
+            <Button onClick={handleUpdate()}>Обновить</Button>
         </div>
     );
 }
