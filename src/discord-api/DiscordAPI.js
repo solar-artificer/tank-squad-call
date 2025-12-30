@@ -360,39 +360,43 @@ class DiscordAPI {
     }
 
     async update() {
-        console.log('UPDATE TEST 34');
-        const targetFileName = path.join(BdApi.Plugins.folder, "TankSquadCall.plugin.js");
-        const updatedSourceCode = await new Promise(async (resolve, reject) => {
-            await request(
-                'https://raw.githubusercontent.com/solar-artificer/tank-squad-call/refs/heads/main/dist/TankSquadCall.plugin.js',
-                (err, resp, result) => {
-                    if (err) {
-                        return reject(err);
-                    }
+        try {
+            const targetFileName = path.join(BdApi.Plugins.folder, "TankSquadCall.plugin.js");
+            const updatedSourceCode = await new Promise(async (resolve, reject) => {
+                await request(
+                    'https://raw.githubusercontent.com/solar-artificer/tank-squad-call/refs/heads/main/dist/TankSquadCall.plugin.js',
+                    (err, resp, result) => {
+                        if (err) {
+                            return reject(err);
+                        }
 
-                    // If a direct url was used
-                    if (resp.statusCode === 200) {
-                        return resolve(result)
-                    }
+                        // If a direct url was used
+                        if (resp.statusCode === 200) {
+                            return resolve(result)
+                        }
 
-                    // If an addon id and redirect was used
-                    if (resp.statusCode === 302) {
-                        request(resp.headers.location, (error, response, body) => {
-                            if (error) {
-                                return reject(error);
-                            }
+                        // If an addon id and redirect was used
+                        if (resp.statusCode === 302) {
+                            request(resp.headers.location, (error, response, body) => {
+                                if (error) {
+                                    return reject(error);
+                                }
 
-                            if (response.statusCode !== 200) {
-                                return reject(response);
-                            }
+                                if (response.statusCode !== 200) {
+                                    return reject(response);
+                                }
 
-                            return resolve(body);
+                                return resolve(body);
+                            });
+                        }
                     });
-                }
             });
-        });
 
-        await fs.writeFile(targetFileName, updatedSourceCode);
+            await fs.writeFile(targetFileName, updatedSourceCode);
+        } catch (error) {
+            this.showToast(`Произошла ошибка при обновлении: "${error.message}"`, "error");
+            this.logError(`Произошла ошибка при обновлении: "${error.message}"`);
+        }
     }
 
     showToast(message, type) {
