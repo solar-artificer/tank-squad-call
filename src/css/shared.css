@@ -249,3 +249,76 @@
     position: relative;
     z-index: 10000;
 }
+
+.discord-slider {
+    --bar-offset: 0px;
+    height: calc(24px + var(--bar-offset));
+    box-sizing: border-box;
+
+    width: 100%;
+    position: relative;
+
+    cursor: pointer;
+    outline: none;
+
+    --grabber-size: 16px;
+    --bar-size: 4px;
+}
+
+.discord-slider:focus-visible .discord-slider-grabber {
+    box-shadow: 0 0 0 3px var(--brand-500, #5865f2);
+}
+
+.discord-slider-track {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}
+
+.discord-slider-bar {
+    box-sizing: border-box;
+    height: var(--bar-size);
+    border-radius: 4px;
+    background-color: var(--interactive-muted);
+    top: calc((24px - var(--bar-size)) / 2 + var(--bar-offset));
+    overflow: hidden;
+    position: relative;
+
+
+    display: block;
+}
+
+.discord-slider-bar-fill {
+    box-sizing: border-box;
+    background-color: var(--background-brand);
+    border: 1px solid hsla(0, 0%, 100%, .1);
+    height: 100%;
+}
+
+.discord-slider-grabber {
+    position: absolute;
+    top: 50%;
+    width: var(--grabber-size, 16px);
+    height: var(--grabber-size, 16px);
+    margin-left: calc(var(--grabber-size, 16px) / -2);
+    margin-top: calc(var(--grabber-size, 16px) / -2);
+    background: #fff;
+    border-radius: 50%;
+    box-shadow:
+            0 3px 1px 0 rgba(0, 0, 0, 0.05),
+            0 2px 2px 0 rgba(0, 0, 0, 0.1),
+            0 3px 3px 0 rgba(0, 0, 0, 0.05);
+    cursor: grab;
+    transition: transform 0.1s ease;
+}
+
+.discord-slider:hover .discord-slider-grabber {
+    transform: scale(1.1);
+}
+
+.discord-slider:active .discord-slider-grabber {
+    cursor: grabbing;
+    transform: scale(1.25);
+}

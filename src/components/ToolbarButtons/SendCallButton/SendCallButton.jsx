@@ -1,14 +1,25 @@
-const {useState, useEffect} = BdApi.React;
+import _ from "lodash";
+
+const {useState, useEffect, useRef} = BdApi.React;
 
 import DiscordApi from '@/discord-api/DiscordAPI';
+import AudioPlayer from '@/audio/audio-player';
 
 import ToolbarButton from "../ToolbarButton/ToolbarButton.jsx";
 
 import call_icon from '@/assets/Ornn_Call_of_the_Forge_God_HD.png';
+import ornn_timer_1 from '@/assets/ornn_timer_1.mp3';
+import ornn_timer_2 from '@/assets/ornn_timer_2.mp3';
+
+const ORNN_GRUMBLING_DELAY = 2 * 60_000;
 
 export default function SendCallButton({freeSlots}) {
     const [cooldown, setCooldown] = useState(0);
     const [isInVoiceChat, setIsInVoiceChat] = useState(false);
+
+    const reminderTimeoutRef = useRef(null);
+    const shouldPlayOrnnRumblingRef = useRef(false);
+    const audioPlayerRef = useRef(new AudioPlayer());
 
     useEffect(() => {
         const updateVoiceStatus = () => {
@@ -25,21 +36,56 @@ export default function SendCallButton({freeSlots}) {
     useEffect(() => {
         const updateCooldown = () => {
             const remainingTime = DiscordApi.getSlowModeCooldown(DiscordApi.settings.callChannelID);
-            setCooldown(remainingTime ? Math.floor(remainingTime / 1000) : 0);
+            const newCooldown = remainingTime
+                ? Math.floor(remainingTime / 1000)
+                : 0;
+            setCooldown(newCooldown);
         };
 
         updateCooldown();
         const intervalId = setInterval(updateCooldown, 25);
 
-        return () => clearInterval(intervalId);
+        return () => {
+            clearInterval(intervalId);
+            if (reminderTimeoutRef.current) {
+                clearTimeout(reminderTimeoutRef.current);
+            }
+        };
     }, []);
+
+    useEffect(() => {
+        if (
+            cooldown === 0
+            && reminderTimeoutRef.current === null
+            && shouldPlayOrnnRumblingRef.current
+        ) {
+            reminderTimeoutRef.current = setTimeout(async () => {
+                shouldPlayOrnnRumblingRef.current = false;
+                reminderTimeoutRef.current = null;
+
+                const randomTrackChoice = _.random(0, 1);
+                const grumblingTrack = randomTrackChoice === 0 ? ornn_timer_1 : ornn_timer_2;
+
+                await audioPlayerRef.current.play(grumblingTrack);
+            }, ORNN_GRUMBLING_DELAY);
+        }
+    }, [cooldown]);
+
+    const handleSendCall = async () => {
+        // Cancel the reminder if user sends a new call
+        if (reminderTimeoutRef.current) {
+            clearTimeout(reminderTimeoutRef.current);
+            reminderTimeoutRef.current = null;
+        }
+        shouldPlayOrnnRumblingRef.current = false;
+
+        await DiscordApi.sendCallMessage(freeSlots);
+
+        shouldPlayOrnnRumblingRef.current = true;
+    };
 
     const isOnCooldown = cooldown !== 0;
     const isDisabled = isOnCooldown || !isInVoiceChat;
-
-    const handleSendCall = () => {
-        DiscordApi.sendCallMessage(freeSlots);
-    };
 
     return (
         <ToolbarButton onClick={handleSendCall}

@@ -62,7 +62,7 @@ class DiscordAPI {
         }
     }
 
-    sendCallMessage(freeSlots) {
+    async sendCallMessage(freeSlots) {
         try {
             const callMessage = {
                 content: this.composeCallMessage(freeSlots),
@@ -72,7 +72,7 @@ class DiscordAPI {
                 nonce: this.generateNonce()
             };
 
-            this.discordInternals.MessageActions.sendMessage(
+            await this.discordInternals.MessageActions.sendMessage(
                 this.settings.callChannelID,
                 callMessage,
                 undefined,

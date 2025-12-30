@@ -5,6 +5,7 @@ import DiscordAPI from "@/discord-api/DiscordAPI";
 import { Field, Label } from '@headlessui/react'
 import DiscordComboBox from "@/components/DiscordComboBox/DiscordComboBox";
 import PicturePicker from "@/components/PicturePicker/PicturePicker";
+import DiscordSlider from "@/components/DiscordSlider/DiscordSlider";
 
 
 export default function SettingsPanel({}) {
@@ -85,6 +86,19 @@ export default function SettingsPanel({}) {
                 label="Картинка с перечнем танков"
                 placeholder="Нажми или перетяни картинку"
             />
+
+            <Field>
+                <Label className="discord-label block mb-2">
+                    Громкость бурчания Орнна
+                </Label>
+                <DiscordSlider
+                    value={settings.ornnRumblingVolume}
+                    onChange={(value) => updateSetting('ornnRumblingVolume', value)}
+                    min={0}
+                    max={1}
+                    step={0.0001}
+                />
+            </Field>
         </div>
     );
 }

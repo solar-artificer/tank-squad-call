@@ -1,12 +1,18 @@
 class AudioPlayer {
-  private audio: HTMLAudioElement;
+  audio;
 
-  constructor(audioSource: string) {
-    this.audio = new Audio(audioSource);
+  constructor(audioSource) {
   }
 
-  play(): Promise<void> {
-    return new Promise<void>(async (resolve) => {
+  play(audioSource, volume = 1) {
+    if (this.audio !== null && this.audio !== undefined) {
+      this.stop();
+    }
+
+    this.audio = new Audio(audioSource);
+    this.audio.volume = volume.toFixed(2);
+
+    return new Promise(async (resolve) => {
       const callback = () => {
         this.audio.removeEventListener('ended', callback);
         this.audio.removeEventListener('pause', callback);
@@ -16,10 +22,14 @@ class AudioPlayer {
       this.audio.addEventListener('ended', callback);
       this.audio.addEventListener('pause', callback);
       await this.audio.play();
-    })
+    });
   }
 
-  stop(): void {
+  stop() {
+    if (this.audio === null || this.audio === undefined) {
+      return;
+    }
+
     this.audio.pause();
     this.audio.currentTime = 0;
   }

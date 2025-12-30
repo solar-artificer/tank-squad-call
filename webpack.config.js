@@ -61,6 +61,10 @@ module.exports = {
                 test: /\.(png|jpg|gif|webp)$/i,
                 use: "url-loader"
             },
+            {
+                test: /\.mp3$/i,
+                use: "url-loader"
+            },
         ]
     },
     plugins: [
