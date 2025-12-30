@@ -362,6 +362,8 @@ class DiscordAPI {
     async update() {
         try {
             const targetFileName = path.join(BdApi.Plugins.folder, "TankSquadCall.plugin.js");
+
+
             const updatedSourceCode = await new Promise(async (resolve, reject) => {
                 await request(
                     'https://raw.githubusercontent.com/solar-artificer/tank-squad-call/refs/heads/main/dist/TankSquadCall.plugin.js',
@@ -392,7 +394,10 @@ class DiscordAPI {
                     });
             });
 
+            console.log(updatedSourceCode);
+
             await fs.writeFile(targetFileName, updatedSourceCode);
+            BdApi.Plugins.reload('Зов ТАНКОСКВАДА');
         } catch (error) {
             this.showToast(`Произошла ошибка при обновлении: "${error.message}"`, "error");
             this.logError(`Произошла ошибка при обновлении: "${error.message}"`);
