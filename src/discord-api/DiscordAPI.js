@@ -366,7 +366,13 @@ class DiscordAPI {
 
             const updatedSourceCode = await new Promise(async (resolve, reject) => {
                 await request(
-                    'https://raw.githubusercontent.com/solar-artificer/tank-squad-call/refs/heads/main/dist/TankSquadCall.plugin.js',
+                    {
+                        url: `https://raw.githubusercontent.com/solar-artificer/tank-squad-call/refs/heads/main/dist/TankSquadCall.plugin.js?t=${Date.now()}`,
+                        headers: {
+                            'Cache-Control': 'no-cache, no-store',
+                            'Pragma': 'no-cache'
+                        }
+                    },
                     (err, resp, result) => {
                         if (err) {
                             return reject(err);
