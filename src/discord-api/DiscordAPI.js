@@ -1,8 +1,9 @@
 import defaultSettings from "./DefaultSettings";
 
 
-const path = require('path');
-const fs = require('fs');
+const path = window.require('path');
+const request = window.require('request');
+const fs = window.require('fs');
 
 class DiscordAPI {
     static PLUGIN_NAME = "TankSquadCall";
@@ -358,9 +359,39 @@ class DiscordAPI {
         return this.discordInternals.SlowmodeStore.getSlowmodeCooldownGuess(channelID);
     }
 
-    update() {
+    async update() {
         const targetFileName = path.join(BdApi.Plugins.folder, "TankSquadCall.plugin.js");
-        console.log(targetFileName);
+        const updatedSourceCode = await new Promise(async (resolve, reject) => {
+            await request(
+                'https://raw.githubusercontent.com/solar-artificer/tank-squad-call/refs/heads/main/dist/TankSquadCall.plugin.js',
+                (err, resp, result) => {
+                    if (err) {
+                        return reject(err);
+                    }
+
+                    // If a direct url was used
+                    if (resp.statusCode === 200) {
+                        return resolve(result)
+                    }
+
+                    // If an addon id and redirect was used
+                    if (resp.statusCode === 302) {
+                        request(resp.headers.location, (error, response, body) => {
+                            if (error) {
+                                return reject(error);
+                            }
+
+                            if (response.statusCode !== 200) {
+                                return reject(response);
+                            }
+
+                            return resolve(body);
+                    });
+                }
+            });
+        });
+
+        await fs.writeFile(targetFileName, updatedSourceCode);
     }
 
     showToast(message, type) {

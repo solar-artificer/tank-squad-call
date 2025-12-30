@@ -33,8 +33,8 @@ export default function SettingsPanel({}) {
         DiscordAPI.saveSettings();
     };
 
-    const handleUpdate = () => {
-        DiscordAPI.update();
+    const handleUpdate = async () => {
+        await DiscordAPI.update();
     };
 
     return (
@@ -104,7 +104,7 @@ export default function SettingsPanel({}) {
                 />
             </Field>
 
-            <Button onClick={handleUpdate()}>Обновить</Button>
+            <button onClick={handleUpdate}>Обновить 23</button>
         </div>
     );
 }
