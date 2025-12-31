@@ -3,6 +3,8 @@ import _ from "lodash";
 const {useState, useEffect, useRef} = BdApi.React;
 
 import DiscordApi from '@/discord-api/DiscordAPI';
+import LeagueClientAPI from "@/lcu/LeagueClientAPI";
+
 import AudioPlayer from '@/audio/audio-player';
 
 import ToolbarButton from "../ToolbarButton/ToolbarButton.jsx";
@@ -63,8 +65,20 @@ export default function SendCallButton({freeSlots}) {
                 shouldPlayOrnnRumblingRef.current = false;
                 reminderTimeoutRef.current = null;
 
+                const leagueLobbyIsFull = await LeagueClientAPI.checkIfLeagueLobbyIsFull();
+                if (leagueLobbyIsFull) {
+                    return;
+                }
+
+                const isQueuedUp = await LeagueClientAPI.checkIfIsQueuedUp();
+                if (isQueuedUp) {
+                    return;
+                }
+
                 const randomTrackChoice = _.random(0, 1);
-                const grumblingTrack = randomTrackChoice === 0 ? ornn_timer_1 : ornn_timer_2;
+                const grumblingTrack = randomTrackChoice === 0
+                    ? ornn_timer_1
+                    : ornn_timer_2;
 
                 await audioPlayerRef.current.play(grumblingTrack);
             }, ORNN_GRUMBLING_DELAY);

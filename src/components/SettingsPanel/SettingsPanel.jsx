@@ -108,6 +108,18 @@ export default function SettingsPanel({}) {
                 />
             </Field>
 
+            <Field>
+                <Label className="discord-label block mb-2">
+                    Путь к lockfile
+                </Label>
+                <input
+                    type="text"
+                    className="discord-input discord-text-input w-full"
+                    value={settings.lockfilePath}
+                    onChange={(e) => updateSetting('lockfilePath', e.target.value)}
+                />
+            </Field>
+
             <div>
                 <button onClick={handleUpdate} className="discord-button discord-button-brand">
                     Обновить

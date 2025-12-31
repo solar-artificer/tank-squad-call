@@ -93,11 +93,6 @@
     transform: scale(1.1);
 }
 
-.picture-picker-container.has-preview {
-    border-style: solid;
-    border-color: #3ba55d;
-}
-
 .picture-picker-container.has-preview:hover {
     border-color: #5865f2;
 }

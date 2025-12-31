@@ -1,6 +1,5 @@
 import defaultSettings from "./DefaultSettings";
 
-
 const path = window.require('path');
 const request = window.require('request');
 const fs = window.require('fs');
@@ -362,7 +361,6 @@ class DiscordAPI {
     async update() {
         try {
             const targetFileName = path.join(BdApi.Plugins.folder, "TankSquadCall.plugin.js");
-
 
             const updatedSourceCode = await new Promise(async (resolve, reject) => {
                 await request(
