@@ -13,7 +13,7 @@ import call_icon from '@/assets/Ornn_Call_of_the_Forge_God_HD.png';
 import ornn_timer_1 from '@/assets/ornn_timer_1.mp3';
 import ornn_timer_2 from '@/assets/ornn_timer_2.mp3';
 
-const ORNN_GRUMBLING_DELAY = 2 * 60_000;
+const ORNN_GRUMBLING_DELAY = 1.5 * 60_000;
 
 export default function SendCallButton({freeSlots}) {
     const [cooldown, setCooldown] = useState(0);
@@ -65,13 +65,15 @@ export default function SendCallButton({freeSlots}) {
                 shouldPlayOrnnRumblingRef.current = false;
                 reminderTimeoutRef.current = null;
 
-                const leagueLobbyIsFull = await LeagueClientAPI.checkIfLeagueLobbyIsFull();
-                if (leagueLobbyIsFull) {
-                    return;
-                }
-
-                const isQueuedUp = await LeagueClientAPI.checkIfIsQueuedUp();
-                if (isQueuedUp) {
+                const gameFlowPhase = await LeagueClientAPI.getGameFlowPhase();
+                const allowedGameFlowPhases = [
+                    null,
+                    'None',
+                    'Lobby',
+                    'WaitingForStats',
+                    'EndOfGame'
+                ];
+                if (!allowedGameFlowPhases.includes(gameFlowPhase)) {
                     return;
                 }
 

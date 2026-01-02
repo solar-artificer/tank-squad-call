@@ -1,29 +1,32 @@
 import defaultSettings from "./DefaultSettings";
+import Logger from "@/logger";
+import {PLUGIN_NAME} from "@/constants";
 
 const path = window.require('path');
 const request = window.require('request');
 const fs = window.require('fs');
 
 class DiscordAPI {
-    static PLUGIN_NAME = "TankSquadCall";
     static SETTINGS_KEY = 'settings';
 
     static SUCCESSFUL_CHANGE_CHANNEL_POLLING_RATE = 50;
 
     constructor() {
         this.loadSettings();
-        this.log('Настройки', this.settings);
+        Logger.log('Настройки', this.settings);
 
         this.discordInternals = this.getDiscordInternals();
+
+        window.DiscordAPI = this;
     }
 
     loadSettings() {
-        const userPersistedSettings = BdApi.Data.load(DiscordAPI.PLUGIN_NAME, DiscordAPI.SETTINGS_KEY);
+        const userPersistedSettings = BdApi.Data.load(PLUGIN_NAME, DiscordAPI.SETTINGS_KEY);
         this.settings = Object.assign({}, defaultSettings, userPersistedSettings);
     }
 
     saveSettings() {
-        BdApi.Data.save(DiscordAPI.PLUGIN_NAME, DiscordAPI.SETTINGS_KEY, this.settings);
+        BdApi.Data.save(PLUGIN_NAME, DiscordAPI.SETTINGS_KEY, this.settings);
     }
 
     getDiscordInternals() {
@@ -84,7 +87,7 @@ class DiscordAPI {
             );
         } catch (error) {
             this.showToast(`Произошла ошибка при послании сообщения: "${error.message}"`, "error");
-            this.logError(`Произошла ошибка при послании сообщения: "${error.message}"`);
+            Logger.logError(`Произошла ошибка при послании сообщения: "${error.message}"`);
         }
     }
 
@@ -101,42 +104,57 @@ class DiscordAPI {
             .replaceAll('LINK', currentVoiceChannelLink);
     }
 
-    createTankSquadChannel() {
+    async createTankSquadChannel() {
         try {
             const initialVoiceChannelID = this.getCurrentVoiceChannel()?.id;
 
             this.joinVoiceChannel(this.settings.createVoiceChannelChannelID);
 
             let unsuccessfulChecks = 0;
-            const intervalID = setInterval(() => {
-                const currentVoiceChannelID = this.getCurrentVoiceChannel()?.id;
+            let successfulChecks = 0;
+            let lastChannelID = this.getCurrentVoiceChannel()?.id;
 
-                if (
-                    currentVoiceChannelID === null || currentVoiceChannelID === undefined
-                    || currentVoiceChannelID === this.settings.createVoiceChannelChannelID
-                    || currentVoiceChannelID === initialVoiceChannelID
-                ) {
-                    unsuccessfulChecks++;
+            await new Promise((resolve, reject) => {
+                const intervalID = setInterval(async () => {
+                    const currentVoiceChannelID = this.getCurrentVoiceChannel()?.id;
 
-                    if (unsuccessfulChecks >= 50) {
-                        this.showToast(`Произошла ошибка при создании канала`, "error");
-                        this.logError(`Произошла ошибка при создании канала`);
-                        clearInterval(intervalID);
+                    if (
+                        currentVoiceChannelID === null || currentVoiceChannelID === undefined
+                        || currentVoiceChannelID === this.settings.createVoiceChannelChannelID
+                        || currentVoiceChannelID === initialVoiceChannelID
+                    ) {
+                        unsuccessfulChecks++;
+
+                        if (unsuccessfulChecks >= 200) {
+                            clearInterval(intervalID);
+                            reject();
+                        }
+
+                        return;
                     }
 
-                    return;
-                }
+                    if (currentVoiceChannelID === lastChannelID) {
+                        successfulChecks++;
+                    } else {
+                        successfulChecks = 0;
+                        lastChannelID = currentVoiceChannelID;
+                    }
 
-                clearInterval(intervalID);
-                this.postPictureToVoiceChannel(
-                    this.settings.serverID,
-                    currentVoiceChannelID,
-                    this.settings.tankPoolPictureUrl
-                );
-            }, DiscordAPI.SUCCESSFUL_CHANGE_CHANNEL_POLLING_RATE);
+                    if (successfulChecks >= 100) {
+                        clearInterval(intervalID);
+                        resolve();
+                    }
+                }, DiscordAPI.SUCCESSFUL_CHANGE_CHANNEL_POLLING_RATE);
+            });
+
+            await this.postPictureToVoiceChannel(
+                this.settings.serverID,
+                this.getCurrentVoiceChannel().id,
+                this.settings.tankPoolPictureUrl
+            );
         } catch (error) {
             this.showToast(`Произошла ошибка при создании канала: "${error.message}"`, "error");
-            this.logError(`Произошла ошибка при создании канала: "${error.message}"`);
+            Logger.logError(`Произошла ошибка при создании канала: "${error.message}"`);
         }
     }
 
@@ -155,15 +173,15 @@ class DiscordAPI {
             throw new Error(`Канал "${channel.name}" не голосовой!`);
         }
 
-        this.log(`Пытаюсь подключиться к войс чату c ID ${channelId}...`);
+        Logger.log(`Пытаюсь подключиться к войс чату c ID ${channelId}...`);
         this.discordInternals.VoiceActions.selectVoiceChannel(channelId);
-        this.log(`Успешно получилось подключиться к войс чату ${channel.name}!`);
+        Logger.log(`Успешно получилось подключиться к войс чату ${channel.name}!`);
     }
 
     // Post picture to a specific voice channel (finds associated text channel)
     // Supports both URL and Base64 encoded images
     async postPictureToVoiceChannel(serverId, voiceChannelId, pictureUrl) {
-        this.log(`Пытаюсь запостить картинку в войс чате c ID ${voiceChannelId}`);
+        Logger.log(`Пытаюсь запостить картинку в войс чате c ID ${voiceChannelId}`);
 
         const voiceChannel = this.discordInternals.ChannelStore.getChannel(voiceChannelId);
         if (!voiceChannel) {
@@ -203,7 +221,7 @@ class DiscordAPI {
         );
 
         this.showToast(`Запостил картинку`, "success");
-        this.log(`Запостил картинку в канал с ID ${targetTextChannel.id}`);
+        Logger.log(`Запостил картинку в канал с ID ${targetTextChannel.id}`, targetTextChannel);
     }
 
     async getFileFromPictureUrl(pictureUrl) {
@@ -349,7 +367,7 @@ class DiscordAPI {
 
             return { voiceChannels, textChannels };
         } catch (error) {
-            this.logError('Ошибка при загрузке чатов:', error);
+            Logger.logError('Ошибка при загрузке чатов:', error);
             return { voiceChannels: [], textChannels: [] };
         }
     }
@@ -409,20 +427,12 @@ class DiscordAPI {
             BdApi.Plugins.reload('Зов ТАНКОСКВАДА');
         } catch (error) {
             this.showToast(`Произошла ошибка при обновлении: "${error.message}"`, "error");
-            this.logError(`Произошла ошибка при обновлении: "${error.message}"`);
+            Logger.logError(`Произошла ошибка при обновлении: "${error.message}"`);
         }
     }
 
     showToast(message, type) {
         BdApi.UI.showToast(message, {type: type});
-    }
-
-    log(...args) {
-        console.log(`[${DiscordAPI.PLUGIN_NAME}]`, ...args);
-    }
-
-    logError(...args) {
-        console.error(`[${DiscordAPI.PLUGIN_NAME}]`, ...args);
     }
 
     generateNonce() {

@@ -136,7 +136,7 @@
 }
 
 .discord-input:hover {
-    border-color: var(--input-border-default-hover);
+    border-color: var(--input-border-hover);
 }
 
 .discord-input:focus {

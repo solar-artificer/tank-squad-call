@@ -137,6 +137,53 @@ class LeagueClientAPI {
             return null;
         }
     }
+
+    async checkIfIsInChampSelect() {
+        try {
+            const didSuccessfullyPrepareApiClient = await this.setup();
+            if (!didSuccessfullyPrepareApiClient) {
+                return null;
+            }
+
+            const { response } = await this.requestToLCU('lol-champ-select/v1/session');
+            if (response.statusCode === 404) {
+                return false;
+            }
+
+            if (response.statusCode !== 200) {
+                throw new Error(response.statusMessage);
+            }
+
+            return true;
+        } catch (error) {
+            Logger.logError(`Произошла ошибка при проверке в пике ли пользователь в LCU: "${error.message}"`);
+            return null;
+        }
+    }
+
+    async getGameFlowPhase() {
+        try {
+            const didSuccessfullyPrepareApiClient = await this.setup();
+            if (!didSuccessfullyPrepareApiClient) {
+                return null;
+            }
+
+            const { response, body } = await this.requestToLCU('lol-gameflow/v1/session');
+            if (response.statusCode === 404) {
+                return null;
+            }
+
+            if (response.statusCode !== 200) {
+                throw new Error(response.statusMessage);
+            }
+
+            const parsedContents = JSON.parse(body);
+            return parsedContents.phase;
+        } catch (error) {
+            Logger.logError(`Произошла ошибка при проверке в пике ли пользователь в LCU: "${error.message}"`);
+            return null;
+        }
+    }
 }
 
 // Create and export singleton instance
