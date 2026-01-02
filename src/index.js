@@ -1,3 +1,6 @@
+import Logger from "@/logger";
+import {PLUGIN_NAME} from "@/constants";
+
 import ToolbarButtons from "./components/ToolbarButtons/ToolbarButtons";
 import SettingsPanel from "./components/SettingsPanel/SettingsPanel";
 
@@ -27,7 +30,7 @@ export default class TankSquadCallPlugin {
     }
 
     start() {
-        console.log("TankSquadCallPlugin запустился!");
+        Logger.log(`${PLUGIN_NAME} запустился!`);
 
         this.addOverrideLeakedCss();
 
@@ -40,7 +43,7 @@ export default class TankSquadCallPlugin {
     }
 
     stop() {
-        console.log("TankSquadCallPlugin остановился!");
+        Logger.log(`${PLUGIN_NAME} остановился!`);
 
         if (this._toolbarButtonsObserver !== null) {
             this._toolbarButtonsObserver.disconnect();

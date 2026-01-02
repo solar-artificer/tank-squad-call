@@ -1,11 +1,11 @@
+import Logger from "@/logger";
+
 const request = window.require('request');
 const fs = window.require('fs');
 
 import DiscordAPI from "@/discord-api/DiscordAPI";
 
 class LeagueClientAPI {
-    static PLUGIN_NAME = "TankSquadCall";
-
     constructor() {
         this.authHeaderValue = null;
         this.baseUrl = null;
@@ -91,7 +91,7 @@ class LeagueClientAPI {
 
             const {response, body} = await this.requestToLCU('lol-lobby/v2/lobby');
             if (response.statusCode === 404) {
-                this.log('404 при проверке полноты лобби в LCU');
+                Logger.log('404 при проверке полноты лобби в LCU');
                 return null;
             }
 
@@ -107,7 +107,7 @@ class LeagueClientAPI {
             // Maybe makes sense to check the invitations too
             return currentMembers.length >= maxLobbySize;
         } catch (error) {
-            this.logError(`Произошла ошибка при проверке полноты лобби в LCU: "${error.message}"`);
+            Logger.logError(`Произошла ошибка при проверке полноты лобби в LCU: "${error.message}"`);
             return null;
         }
     }
@@ -121,7 +121,7 @@ class LeagueClientAPI {
 
             const {response, body} = await this.requestToLCU('lol-matchmaking/v1/search');
             if (response.statusCode === 404) {
-                this.log('404 при проверке статуса поиска в LCU');
+                Logger.log('404 при проверке статуса поиска в LCU');
                 return null;
             }
 
@@ -133,17 +133,9 @@ class LeagueClientAPI {
 
             return parsedContents.isCurrentlyInQueue;
         } catch (error) {
-            this.logError(`Произошла ошибка при проверке статуса поиска в LCU: "${error.message}"`);
+            Logger.logError(`Произошла ошибка при проверке статуса поиска в LCU: "${error.message}"`);
             return null;
         }
-    }
-
-    log(...args) {
-        console.log(`[${LeagueClientAPI.PLUGIN_NAME}]`, ...args);
-    }
-
-    logError(...args) {
-        console.error(`[${LeagueClientAPI.PLUGIN_NAME}]`, ...args);
     }
 }
 
