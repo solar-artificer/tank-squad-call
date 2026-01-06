@@ -9,6 +9,8 @@ class LeagueClientAPI {
     constructor() {
         this.authHeaderValue = null;
         this.baseUrl = null;
+
+        window.LeagueClientAPI = this;
     }
 
     async setup() {
