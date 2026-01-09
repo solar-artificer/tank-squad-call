@@ -59,6 +59,8 @@ class LeagueClientAPI {
         const rawAuthToken = `riot:${token}`;
         const encodedAuthToken = btoa(rawAuthToken);
         this.authHeaderValue = `Basic ${encodedAuthToken}`;
+
+        return true;
     }
 
     async requestToLCU(relativeUrl) {
