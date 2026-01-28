@@ -34,7 +34,7 @@ export default class TankSquadCallPlugin {
 
         this.addOverrideLeakedCss();
 
-        const toolbar = document.querySelector('[class*="-appAsidePanelWrapper"] [class*="-base"] > [class*="-bar"] [class*="-trailing"]');
+        const toolbar = document.querySelector('[class*="appAsidePanelWrapper"] [class*="base"] > [class*="bar"] [class*="trailing"]');
         if (toolbar !== null) {
             this.addToolbarButtons();
         }
@@ -116,7 +116,7 @@ export default class TankSquadCallPlugin {
                 for (const addedNode of mutation.addedNodes) {
                     if (
                         addedNode.nodeType === Node.ELEMENT_NODE
-                        && addedNode.matches('[class*="appAsidePanelWrapper"] [class*="-base"] > [class*="-bar"]')
+                        && addedNode.matches('[class*="appAsidePanelWrapper"] [class*="base"] > [class*="bar"]')
                     ) {
                         this.addToolbarButtons();
                     }
@@ -140,7 +140,7 @@ export default class TankSquadCallPlugin {
             this._toolbarButtonsContainerElement.remove();
         }
 
-        const toolbar = document.querySelector('[class*="-appAsidePanelWrapper"] [class*="-base"] > [class*="-bar"] [class*="-trailing"]');
+        const toolbar = document.querySelector('[class*="appAsidePanelWrapper"] [class*="base"] > [class*="bar"] [class*="trailing"]');
 
         this._toolbarButtonsContainerElement = BdApi.DOM.parseHTML("<div class='toolbar-buttons-container' style='position: relative; z-index: 10000; overflow: visible;'>");
         toolbar.prepend(this._toolbarButtonsContainerElement);
